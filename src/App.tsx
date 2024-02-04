@@ -14,13 +14,18 @@ export type Coordinate = [number, number];
 export type PointWithID = { id: string; point: JSX.Element };
 
 function App() {
-  const a = <Point center={[200, 200]} />;
-  const b = <Point center={[300, 300]} />;
-  const c = <Point center={[400, 400]} />;
-
   const myPointA = new PrototypePoint([150, 100]);
   const myPointB = new PrototypePoint([550, 500]);
   const myPointC = new PrototypePoint([600, 600]);
+  const myPointD = new PrototypePoint([1000, 100]);
+
+  const myPointE = new PrototypePoint([1000, 200]);
+  const myPointF = new PrototypePoint([1250, 300]);
+  const myPointG = new PrototypePoint([1120, 200]);
+
+  const myPointH = new PrototypePoint([900, 500]);
+  const myPointI = new PrototypePoint([1000, 600]);
+  const myPointJ = new PrototypePoint([1100, 700]);
 
   return (
     <MousePositionProvider>
@@ -39,16 +44,30 @@ function App() {
         <Point center={[40, 40]} />
         <Point center={[90, 60]} />
         <Point center={[180, 62]} /> */}
-        {a}
-        {b}
-        {c}
-        <PointVector pointA={a} pointB={b} />
-        <PointVector pointA={b} pointB={c} />
+
         {myPointA.render()}
         {myPointB.render()}
         {myPointC.render()}
+        {/* {myPointD.render()} */}
         <PrototypeVector pointA={myPointA} pointB={myPointB} />
         <PrototypeVector pointA={myPointB} pointB={myPointC} />
+        <PrototypeVector pointA={myPointC} pointB={myPointA} />
+
+        {myPointD.render()}
+        {myPointE.render()}
+        {myPointF.render()}
+        {myPointG.render()}
+
+        <PrototypeVector pointA={myPointD} pointB={myPointE} />
+        <PrototypeVector pointA={myPointE} pointB={myPointF} />
+        <PrototypeVector pointA={myPointE} pointB={myPointG} />
+
+        {myPointH.render()}
+        {myPointI.render()}
+        {myPointJ.render()}
+
+        <PrototypeVector pointA={myPointH} pointB={myPointI} />
+        <PrototypeVector pointA={myPointI} pointB={myPointJ} />
       </div>
     </MousePositionProvider>
   );
