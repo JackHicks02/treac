@@ -9,16 +9,12 @@ export interface PointProps {
 
 const Point2: FC<PointProps> = ({ center, vectorPositionSetters }) => {
   const [myCenter, setMyCenter] = useState<Coordinate>(center);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  // const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = () => {
-    setIsDraggable(true);
-  };
-
-  const handleUnClick = () => {
-    setIsDraggable(false);
+    setIsDraggable((prevState) => !prevState);
   };
 
   const handleMouseEnter = () => {
@@ -29,20 +25,19 @@ const Point2: FC<PointProps> = ({ center, vectorPositionSetters }) => {
     setIsHovered(false);
   };
 
-  const handleMove = () => {
+  const handleMove = (x: number, y: number) => {
     if (isDraggable) {
-      setMyCenter([mousePosition.x, mousePosition.y]);
-      console.log(vectorPositionSetters);
+      setMyCenter([x, y]);
       vectorPositionSetters.forEach((setter) =>
-        setter ? setter([mousePosition.x, mousePosition.y]) : null
+        setter ? setter([x, y]) : null
       );
     }
   };
 
   useEffect(() => {
     const updateMousePosition = (e: MouseEvent) => {
-      if (isHovered) {
-        setMousePosition({ x: e.clientX, y: e.clientY });
+      if (isDraggable) {
+        handleMove(e.clientX, e.clientY);
       }
     };
 
@@ -51,7 +46,7 @@ const Point2: FC<PointProps> = ({ center, vectorPositionSetters }) => {
     return () => {
       window.removeEventListener("mousemove", updateMousePosition);
     };
-  }, [isHovered]);
+  }, [isDraggable]);
 
   const width: number = 10;
   return (
@@ -72,8 +67,8 @@ const Point2: FC<PointProps> = ({ center, vectorPositionSetters }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseDown={handleClick}
-      onMouseUp={handleUnClick}
-      onMouseMove={handleMove}
+      // onMouseUp={handleUnClick}
+      // onMouseMove={handleMove}
     >
       {/* <div>
         {mousePosition.x} {mousePosition.y}
