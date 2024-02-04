@@ -1,14 +1,13 @@
 import { FC, useEffect, useState } from "react";
 import { Coordinate } from "../App";
-import { useMouseContext } from "./MousePositionContext";
-import { setVectorPointRef } from "./PointVector";
+import { setVectorPoint } from "./PrototypeVector";
 
 export interface PointProps {
   center: Coordinate;
-  setVectorPointRef?: setVectorPointRef;
+  vectorPositionSetters: setVectorPoint[];
 }
 
-const Point: FC<PointProps> = ({ center, setVectorPointRef }) => {
+const Point2: FC<PointProps> = ({ center, vectorPositionSetters }) => {
   const [myCenter, setMyCenter] = useState<Coordinate>(center);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDraggable, setIsDraggable] = useState(false);
@@ -33,11 +32,10 @@ const Point: FC<PointProps> = ({ center, setVectorPointRef }) => {
   const handleMove = () => {
     if (isDraggable) {
       setMyCenter([mousePosition.x, mousePosition.y]);
-
-      if (setVectorPointRef?.current) {
-        setVectorPointRef.current([mousePosition.x, mousePosition.y]);
-        console.log("POINTS: x: " + mousePosition.x + " y: " + mousePosition.y);
-      }
+      console.log(vectorPositionSetters);
+      vectorPositionSetters.forEach((setter) =>
+        setter ? setter([mousePosition.x, mousePosition.y]) : null
+      );
     }
   };
 
@@ -84,4 +82,4 @@ const Point: FC<PointProps> = ({ center, setVectorPointRef }) => {
   );
 };
 
-export default Point;
+export default Point2;

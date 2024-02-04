@@ -1,7 +1,6 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Coordinate } from "../App";
-import { useMouseContext } from "./MousePositionContext";
-import { setVectorPoint, setVectorPointRef } from "./PointVector";
+import { setVectorPointRef } from "./PointVector";
 
 interface VectorProps {
   origin: Coordinate;
@@ -18,8 +17,8 @@ const Vector: FC<VectorProps> = ({
 }) => {
   const [myOrigin, setMyOrigin] = useState<Coordinate>(origin);
   const [myDestination, setMyDestination] = useState<Coordinate>(destination);
-  console.log("my origin ", myOrigin);
-  console.log("My destination", myDestination);
+  // console.log("my origin ", myOrigin);
+  // console.log("My destination", myDestination);
 
   useEffect(() => {
     if (setVectorOriginRef && setVectorDestinationRef) {
