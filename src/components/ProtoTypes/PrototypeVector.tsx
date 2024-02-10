@@ -1,7 +1,8 @@
-import { FC, cloneElement, useRef } from "react";
-import { Coordinate } from "../App";
+import { FC, cloneElement, useEffect, useRef } from "react";
+import { Coordinate } from "../../App";
 import { PointProps } from "./Point";
 import Vector from "./Vector";
+import PrototypePoint from "./PrototypePoint";
 
 export type setVectorPoint = null | React.Dispatch<
   React.SetStateAction<Coordinate>
@@ -9,36 +10,35 @@ export type setVectorPoint = null | React.Dispatch<
 
 export type setVectorPointRef = React.MutableRefObject<setVectorPoint>;
 
-interface PointVectorProps {
-  pointA: JSX.Element;
-  pointB: JSX.Element;
+interface PrototypePointVectorProps {
+  pointA: PrototypePoint;
+  pointB: PrototypePoint;
 }
 
-const PointVector: FC<PointVectorProps> = ({ pointA, pointB }) => {
+const PrototypeVector: FC<PrototypePointVectorProps> = ({ pointA, pointB }) => {
   // const pointACoordinatesRef = useRef<Coordinate>([0, 0]);
   // const pointBCoordinatesRef = useRef<Coordinate>([0, 0]);
 
   const setVectorOriginRef = useRef<setVectorPoint>(null);
   const setVectorDestinationRef = useRef<setVectorPoint>(null);
 
-  console.log("props", pointA.props);
+  // console.log("props", pointA.props);
+
+  useEffect(() => {
+    pointA.pushSetter(setVectorOriginRef.current);
+    pointB.pushSetter(setVectorDestinationRef.current);
+  }, []);
 
   return (
     <>
-      {cloneElement(pointA, {
-        setVectorPointRef: setVectorOriginRef,
-      })}
       <Vector
-        origin={pointA.props.center}
-        destination={pointB.props.center}
+        origin={pointA.getCentre()}
+        destination={pointB.getCentre()}
         setVectorOriginRef={setVectorOriginRef}
         setVectorDestinationRef={setVectorDestinationRef}
       />
-      {cloneElement(pointB, {
-        setVectorPointRef: setVectorDestinationRef,
-      })}
     </>
   );
 };
 
-export default PointVector;
+export default PrototypeVector;

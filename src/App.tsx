@@ -1,13 +1,14 @@
 import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
-import Vector from "./components/Vector";
-import Point from "./components/Point";
-import MousePositionProvider from "./components/MousePositionContext";
-import PointVector from "./components/PointVector";
+import Vector from "./components/ProtoTypes/Vector";
+import Point from "./components/ProtoTypes/Point";
+import MousePositionProvider from "./components/ProtoTypes/MousePositionContext";
+import PointVector from "./components/ProtoTypes/PointVector";
 import { prototype } from "events";
-import PrototypePoint from "./components/PrototypePoint";
-import PrototypeVector from "./components/PrototypeVector";
+import PrototypePoint from "./components/ProtoTypes/PrototypePoint";
+import PrototypeVector from "./components/ProtoTypes/PrototypeVector";
+import AND from "./components/Gates/And";
 
 export type Coordinate = [number, number];
 
@@ -26,6 +27,13 @@ function App() {
   const myPointH = new PrototypePoint([900, 500]);
   const myPointI = new PrototypePoint([1000, 600]);
   const myPointJ = new PrototypePoint([1100, 700]);
+
+  const myPointZ = new PrototypePoint([200, 500], true);
+  const myPointY = new PrototypePoint([300, 600]);
+  const myPointX = new PrototypePoint([400, 500]);
+  const myPointW = new PrototypePoint([100, 600]);
+  const myPointV = new PrototypePoint([500, 600]);
+  const myPointU = new PrototypePoint([300, 700]);
 
   return (
     <MousePositionProvider>
@@ -48,7 +56,6 @@ function App() {
         {myPointA.render()}
         {myPointB.render()}
         {myPointC.render()}
-        {/* {myPointD.render()} */}
         <PrototypeVector pointA={myPointA} pointB={myPointB} />
         <PrototypeVector pointA={myPointB} pointB={myPointC} />
         <PrototypeVector pointA={myPointC} pointB={myPointA} />
@@ -68,6 +75,28 @@ function App() {
 
         <PrototypeVector pointA={myPointH} pointB={myPointI} />
         <PrototypeVector pointA={myPointI} pointB={myPointJ} />
+
+        {myPointZ.render()}
+        {myPointY.render()}
+        {myPointX.render()}
+        {myPointW.render()}
+        {myPointV.render()}
+        {myPointU.render()}
+
+        <AND centre={[700, 500]} />
+
+        <PrototypeVector pointA={myPointZ} pointB={myPointX} />
+        <PrototypeVector pointA={myPointZ} pointB={myPointY} />
+        <PrototypeVector pointA={myPointX} pointB={myPointY} />
+        <PrototypeVector pointA={myPointX} pointB={myPointY} />
+        <PrototypeVector pointA={myPointY} pointB={myPointW} />
+        <PrototypeVector pointA={myPointW} pointB={myPointZ} />
+        <PrototypeVector pointA={myPointW} pointB={myPointZ} />
+        <PrototypeVector pointA={myPointX} pointB={myPointV} />
+        <PrototypeVector pointA={myPointY} pointB={myPointV} />
+        <PrototypeVector pointA={myPointY} pointB={myPointU} />
+        <PrototypeVector pointA={myPointV} pointB={myPointU} />
+        <PrototypeVector pointA={myPointW} pointB={myPointU} />
       </div>
     </MousePositionProvider>
   );

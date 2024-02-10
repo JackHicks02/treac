@@ -1,0 +1,104 @@
+import { FC, useEffect, useRef, useState } from "react";
+import { Coordinate } from "../../App";
+import { setVectorPoint } from "./PrototypeVector";
+
+export interface PointProps {
+  center: Coordinate;
+  vectorPositionSetters: setVectorPoint[];
+  value: boolean;
+}
+
+const Point2: FC<PointProps> = ({ center, vectorPositionSetters, value }) => {
+  const [myCenter, setMyCenter] = useState<Coordinate>(center);
+  const [myValue, setMyValue] = useState<boolean>(value);
+  // const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isDraggable, setIsDraggable] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const divRef = useRef<HTMLDivElement | null>(null);
+
+  const handleClick = () => {
+    setIsDraggable((prevState) => !prevState);
+  };
+
+  const handleMouseEnter = () => {
+    divRef.current?.focus();
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
+  const handleMove = (x: number, y: number) => {
+    if (isDraggable) {
+      setMyCenter([x, y]);
+      vectorPositionSetters.forEach((setter) =>
+        setter ? setter([x, y]) : null
+      );
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (isHovered) {
+      switch (e.key) {
+        case "t":
+          setMyValue(true);
+          console.log(myValue);
+          break;
+        case "f":
+          setMyValue((prev) => false);
+          break;
+        default:
+          break;
+      }
+    }
+  };
+
+  useEffect(() => {
+    const updateMousePosition = (e: MouseEvent) => {
+      if (isDraggable) {
+        handleMove(e.clientX, e.clientY);
+      }
+    };
+
+    window.addEventListener("mousemove", updateMousePosition);
+
+    return () => {
+      window.removeEventListener("mousemove", updateMousePosition);
+    };
+  }, [isDraggable]);
+
+  const width: number = 10;
+  return (
+    <div
+      tabIndex={1}
+      ref={divRef}
+      style={{
+        width: width,
+        height: width,
+        borderRadius: width,
+        backgroundColor: myValue ? "blue" : "white",
+        position: "absolute",
+        left: myCenter[0],
+        top: myCenter[1],
+        transform: `translate(-50%, -50%)`,
+        cursor: isHovered ? "pointer" : "crosshair",
+        color: myValue ? "cyan" : "white",
+        zIndex: 2,
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseDown={handleClick}
+      onKeyDown={handleKeyPress}
+      // onMouseUp={handleUnClick}
+      // onMouseMove={handleMove}
+    >
+      {/* <div>
+        {mousePosition.x} {mousePosition.y}
+      </div> */}
+    </div>
+  );
+};
+
+export default Point2;

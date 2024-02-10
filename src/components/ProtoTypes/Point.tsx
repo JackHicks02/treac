@@ -1,20 +1,25 @@
 import { FC, useEffect, useState } from "react";
-import { Coordinate } from "../App";
-import { setVectorPoint } from "./PrototypeVector";
+import { Coordinate } from "../../App";
+import { useMouseContext } from "./MousePositionContext";
+import { setVectorPointRef } from "./PointVector";
 
 export interface PointProps {
   center: Coordinate;
-  vectorPositionSetters: setVectorPoint[];
+  setVectorPointRef?: setVectorPointRef;
 }
 
-const Point2: FC<PointProps> = ({ center, vectorPositionSetters }) => {
+const Point: FC<PointProps> = ({ center, setVectorPointRef }) => {
   const [myCenter, setMyCenter] = useState<Coordinate>(center);
-  // const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = () => {
-    setIsDraggable((prevState) => !prevState);
+    setIsDraggable(true);
+  };
+
+  const handleUnClick = () => {
+    setIsDraggable(false);
   };
 
   const handleMouseEnter = () => {
@@ -25,19 +30,21 @@ const Point2: FC<PointProps> = ({ center, vectorPositionSetters }) => {
     setIsHovered(false);
   };
 
-  const handleMove = (x: number, y: number) => {
+  const handleMove = () => {
     if (isDraggable) {
-      setMyCenter([x, y]);
-      vectorPositionSetters.forEach((setter) =>
-        setter ? setter([x, y]) : null
-      );
+      setMyCenter([mousePosition.x, mousePosition.y]);
+
+      if (setVectorPointRef?.current) {
+        setVectorPointRef.current([mousePosition.x, mousePosition.y]);
+        console.log("POINTS: x: " + mousePosition.x + " y: " + mousePosition.y);
+      }
     }
   };
 
   useEffect(() => {
     const updateMousePosition = (e: MouseEvent) => {
-      if (isDraggable) {
-        handleMove(e.clientX, e.clientY);
+      if (isHovered) {
+        setMousePosition({ x: e.clientX, y: e.clientY });
       }
     };
 
@@ -46,7 +53,7 @@ const Point2: FC<PointProps> = ({ center, vectorPositionSetters }) => {
     return () => {
       window.removeEventListener("mousemove", updateMousePosition);
     };
-  }, [isDraggable]);
+  }, [isHovered]);
 
   const width: number = 10;
   return (
@@ -67,8 +74,8 @@ const Point2: FC<PointProps> = ({ center, vectorPositionSetters }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseDown={handleClick}
-      // onMouseUp={handleUnClick}
-      // onMouseMove={handleMove}
+      onMouseUp={handleUnClick}
+      onMouseMove={handleMove}
     >
       {/* <div>
         {mousePosition.x} {mousePosition.y}
@@ -77,4 +84,4 @@ const Point2: FC<PointProps> = ({ center, vectorPositionSetters }) => {
   );
 };
 
-export default Point2;
+export default Point;
