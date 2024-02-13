@@ -16,17 +16,16 @@ interface PrototypePointVectorProps {
 }
 
 const PrototypeVector: FC<PrototypePointVectorProps> = ({ pointA, pointB }) => {
-  // const pointACoordinatesRef = useRef<Coordinate>([0, 0]);
-  // const pointBCoordinatesRef = useRef<Coordinate>([0, 0]);
-
   const setVectorOriginRef = useRef<setVectorPoint>(null);
   const setVectorDestinationRef = useRef<setVectorPoint>(null);
-
-  // console.log("props", pointA.props);
 
   useEffect(() => {
     pointA.pushSetter(setVectorOriginRef.current);
     pointB.pushSetter(setVectorDestinationRef.current);
+
+    //get the set value function of both points and provide it to the other
+    pointA.pushValueSetter(pointB.setValue);
+    pointB.pushValueSetter(pointA.setValue);
   }, []);
 
   return (

@@ -6,9 +6,18 @@ export interface PointProps {
   center: Coordinate;
   vectorPositionSetters: setVectorPoint[];
   value: boolean;
+  setValue: (_value: boolean) => void;
+  pointValueSetter: (_value: boolean) => void;
+  bindRender: (dispatch: React.Dispatch<React.SetStateAction<boolean>>) => void;
 }
 
-const Point2: FC<PointProps> = ({ center, vectorPositionSetters, value }) => {
+const Point2: FC<PointProps> = ({
+  center,
+  vectorPositionSetters,
+  value,
+  pointValueSetter,
+  bindRender,
+}) => {
   const [myCenter, setMyCenter] = useState<Coordinate>(center);
   const [myValue, setMyValue] = useState<boolean>(value);
   // const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -39,15 +48,18 @@ const Point2: FC<PointProps> = ({ center, vectorPositionSetters, value }) => {
     }
   };
 
+  useEffect(() => {
+    bindRender(setMyValue);
+  }, []);
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (isHovered) {
       switch (e.key) {
         case "t":
-          setMyValue(true);
-          console.log(myValue);
+          pointValueSetter(true);
           break;
         case "f":
-          setMyValue((prev) => false);
+          pointValueSetter(false);
           break;
         default:
           break;
