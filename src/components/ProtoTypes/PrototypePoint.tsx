@@ -39,7 +39,7 @@ class PrototypePoint {
   getValue() {
     return this.value;
   }
-  setValue(value: boolean, propagate: boolean = true) {
+  setValue = (value: boolean, propagate: boolean = true) => {
     this.value = value;
     if (propagate) {
       this.valueSetters.forEach((setter) => {
@@ -50,7 +50,7 @@ class PrototypePoint {
         }
       });
     }
-  }
+  };
 
   render() {
     return (

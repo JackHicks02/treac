@@ -31,7 +31,6 @@ const Point2: FC<PointProps> = ({
   };
 
   const handleMouseEnter = () => {
-    divRef.current?.focus();
     setIsHovered(true);
   };
 
