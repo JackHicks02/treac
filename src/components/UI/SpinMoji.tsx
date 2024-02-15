@@ -4,7 +4,7 @@ const SpinMoji = () => {
   const [rotation, setRotation] = useState<number>(0);
 
   useEffect(() => {
-    setInterval(() => {
+    const interval = setInterval(() => {
       setRotation((prevRotation) => {
         if ((prevRotation + 6) % 360 === 0) {
           return 0;
@@ -12,6 +12,9 @@ const SpinMoji = () => {
         return prevRotation + 6;
       });
     }, 2000 / 60);
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   return (

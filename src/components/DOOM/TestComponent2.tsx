@@ -1,16 +1,16 @@
 import { FC, useState, useEffect } from "react";
-import { ChildSetter, State } from "./Objectionable";
+import { ChildSetter, State } from "./Objectionable2";
 
 interface TestComponentProps {
   bindSetterFn: (_childSetter: ChildSetter) => void;
-  setterFn: (newState: State) => void;
+  setterFn: (boolean: boolean) => void;
   getState: () => State;
   x: number;
   y: number;
   name: string;
 }
 
-const TestComponent: FC<TestComponentProps> = ({
+const TestComponent2: FC<TestComponentProps> = ({
   bindSetterFn,
   setterFn,
   getState,
@@ -18,14 +18,8 @@ const TestComponent: FC<TestComponentProps> = ({
   y,
   name,
 }) => {
-  const [myState, setMyState] = useState<State>({
-    borderColour: false,
-    backgroundColor: "black",
-  });
-
-  useEffect(() => {
-    bindSetterFn(setMyState);
-  }, []);
+  const [render, makeRender] = useState<boolean>(false);
+  bindSetterFn(makeRender);
 
   return (
     <div
@@ -43,18 +37,16 @@ const TestComponent: FC<TestComponentProps> = ({
       <div
         style={{
           padding: "10px",
-          border: `1px solid ${myState.borderColour ? "green" : "blue"}`,
+          border: `1px solid ${getState().borderColour}`,
         }}
       >
         {name}
       </div>
       <div style={{ padding: "10px", border: "1px solid red" }}>
-        <button
-          onClick={() => setterFn({ borderColour: !myState.borderColour })}
-        />
+        <button onClick={() => setterFn(!render)} />
       </div>
     </div>
   );
 };
 
-export default TestComponent;
+export default TestComponent2;
