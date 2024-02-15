@@ -1,6 +1,7 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useContext, useEffect, useRef, useState } from "react";
 import { Coordinate } from "../../App";
 import { setVectorPoint } from "./PrototypeVector";
+import { MousePositionContext } from "../../utils/MousePositionContext";
 
 export interface PointProps {
   center: Coordinate;
@@ -24,6 +25,8 @@ const Point2: FC<PointProps> = ({
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  const parentDiv = useContext(MousePositionContext)?.containerRef;
+
   const divRef = useRef<HTMLDivElement | null>(null);
 
   const handleClick = () => {
@@ -39,10 +42,14 @@ const Point2: FC<PointProps> = ({
   };
 
   const handleMove = (x: number, y: number) => {
-    if (isDraggable) {
-      setMyCenter([x, y]);
+    if (isDraggable && parentDiv?.current) {
+      const rect = parentDiv.current.getBoundingClientRect();
+      const adjustedX = x - rect.left;
+      const adjustedY = y - rect.top;
+
+      setMyCenter([adjustedX, adjustedY]);
       vectorPositionSetters.forEach((setter) =>
-        setter ? setter([x, y]) : null
+        setter ? setter([adjustedX, adjustedY]) : null
       );
     }
   };

@@ -3,6 +3,7 @@ import Menu from "./components/UI/Menu";
 import { JemContextProvider } from "./utils/JemStore";
 import { tabsDict } from "./utils/TabsDict";
 import Tab from "./components/UI/Tab";
+import { MousePositionProvider } from "./utils/MousePositionContext";
 
 export type Coordinate = [number, number];
 
@@ -26,9 +27,11 @@ function App() {
         }}
       >
         <Menu />
-        <div style={{ position: "relative" }}>
-          <Tab />
-        </div>
+        <MousePositionProvider>
+          <div style={{ position: "relative" }}>
+            <Tab />
+          </div>
+        </MousePositionProvider>
       </div>
     </JemContextProvider>
   );
