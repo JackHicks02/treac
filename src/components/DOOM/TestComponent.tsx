@@ -7,6 +7,7 @@ interface TestComponentProps {
   getState: () => State;
   x: number;
   y: number;
+  name: string;
 }
 
 const TestComponent: FC<TestComponentProps> = ({
@@ -15,9 +16,10 @@ const TestComponent: FC<TestComponentProps> = ({
   getState,
   x,
   y,
+  name,
 }) => {
   const [myState, setMyState] = useState<State>({
-    borderColour: "blue",
+    borderColour: false,
     backgroundColor: "black",
   });
 
@@ -39,12 +41,17 @@ const TestComponent: FC<TestComponentProps> = ({
       }}
     >
       <div
-        style={{ padding: "10px", border: `1px solid ${myState.borderColour}` }}
+        style={{
+          padding: "10px",
+          border: `1px solid ${myState.borderColour ? "green" : "blue"}`,
+        }}
       >
-        disaster in bound!
+        {name}
       </div>
       <div style={{ padding: "10px", border: "1px solid red" }}>
-        <button onClick={() => setterFn({ borderColour: "green" })}></button>
+        <button
+          onClick={() => setterFn({ borderColour: !myState.borderColour })}
+        ></button>
       </div>
     </div>
   );

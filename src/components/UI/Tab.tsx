@@ -8,7 +8,6 @@ const Tab = () => {
 
   const mouseContext = useContext(MousePositionContext)?.containerRef;
 
-  console.log(mouseContext);
   return (
     <div style={{ height: "100%" }} ref={mouseContext}>
       {tabsDict[tabJem.getValue()]}
