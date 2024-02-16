@@ -152,7 +152,9 @@ const BitNode: FC<BitNodeProps> = ({ bitLine, bitLineListeners, position }) => {
 
   const handleClick = () => {
     bitLine.bit = !bitLine.bit;
-    bitLineListeners.forEach((render) => render());
+    bitLineListeners.forEach((render) => {
+      render();
+    });
   };
 
   return (
@@ -175,9 +177,11 @@ const Squidward = () => {
   const bitLineA = { bit: false };
   const bitLineB = { bit: false };
   const bitLineC = { bit: false };
+  const bitLineZ = { bit: false };
   const bitLineListenersA: (() => void)[] = [];
   const bitLineListenersB: (() => void)[] = [];
   const bitLineListenersC: (() => void)[] = [];
+  const bitLineListenersZ: (() => void)[] = [];
 
   const bitLineA1 = { bit: false };
   const bitLineB1 = { bit: false };
@@ -214,6 +218,17 @@ const Squidward = () => {
         bitLine={bitLineC}
         bitLineListeners={bitLineListenersC}
         position={[650, 554]}
+      />
+      <NOT
+        bitLine={bitLineZ}
+        bitLineListeners={bitLineListenersZ}
+        position={[700, 550]}
+        ALine={{ bitLine: bitLineC, bitLineListeners: bitLineListenersC }}
+      />
+      <BitNode
+        bitLine={bitLineZ}
+        bitLineListeners={bitLineListenersZ}
+        position={[750, 554]}
       />
 
       <BitNode
