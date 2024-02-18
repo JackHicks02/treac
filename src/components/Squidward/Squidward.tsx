@@ -1,59 +1,79 @@
 import { FC, useEffect, useRef, useState } from "react";
 import { useRender } from "../../utils/useRender";
 import { Coordinate } from "../../App";
+import {
+  removeElement,
+  removeElementFromMany,
+  useTwoLineMount,
+} from "../../utils/utils";
 
 type BitObj = { bit: boolean };
 type BitLineListener = () => void;
-class Bitline {}
+class BitLine {
+  //Make new BitObj and Listener arr
+  private BitObj: BitObj = { bit: false };
+  private BitLineListeners: BitLineListener[] = [];
 
-const and = (a: boolean, b: boolean) => {
-  return a && b;
-};
+  constructor(defaultValue?: boolean) {
+    this.BitObj = { bit: defaultValue ?? false };
+  }
 
-const or = (a: boolean, b: boolean) => {
-  return a || b;
-};
+  LineWithListener: LineWithListener = {
+    bitLine: this.BitObj,
+    bitLineListeners: this.BitLineListeners,
+  };
+}
 
-const not = (a: boolean) => {
-  return !a;
-};
+//This is probably unesccesarily slow even if it is more reusable
+// const and = (a: boolean, b: boolean) => {
+//   return a && b;
+// };
 
-type LineListener = {
+// const or = (a: boolean, b: boolean) => {
+//   return a || b;
+// };
+
+// const not = (a: boolean) => {
+//   return !a;
+// };
+
+// Ask dem what to do here, whether this shouldn't exist and should just be replaced with the class (or something else entirely)?
+export type LineWithListener = {
   bitLine: BitObj;
   bitLineListeners: BitLineListener[];
 };
 
-type BitNodeProps = LineListener & {
+type BitNodeProps = {
+  CLine: LineWithListener;
   position: Coordinate;
 };
 
 type OneLineProps = BitNodeProps & {
-  ALine: LineListener;
+  ALine: LineWithListener;
 };
 
 type TwoLineProps = BitNodeProps & {
-  ALine: LineListener;
-  BLine: LineListener;
+  ALine: LineWithListener;
+  BLine: LineWithListener;
   //CLine is inherited from BitNodeProps <- LineListener ?
 };
 
-const NOT: FC<OneLineProps> = ({
-  bitLine,
-  position,
-  bitLineListeners,
-  ALine,
-}) => {
+const NOT: FC<OneLineProps> = ({ position, CLine, ALine }) => {
   const render = useRender();
   const a = ALine.bitLine.bit;
   const b = !a;
 
   useEffect(() => {
-    ALine.bitLineListeners.push(render);
-    //TODO: These all need to be removed on unmount
+    const _setter = render;
+    ALine.bitLineListeners.push(_setter);
+    return () => {
+      removeElement<() => void>(ALine.bitLineListeners, _setter);
+      //TS is properly inferring ()=>void so won't write it after
+    };
   }, []);
 
-  bitLine.bit = b;
-  bitLineListeners.forEach((listener) => listener());
+  CLine.bitLine.bit = b;
+  CLine.bitLineListeners.forEach((listener) => listener());
 
   return (
     <div
@@ -68,13 +88,7 @@ const NOT: FC<OneLineProps> = ({
   );
 };
 
-const OR: FC<TwoLineProps> = ({
-  bitLine,
-  position,
-  bitLineListeners,
-  ALine,
-  BLine,
-}) => {
+const OR: FC<TwoLineProps> = ({ position, CLine, ALine, BLine }) => {
   const render = useRender();
   const a = ALine.bitLine.bit;
   const b = BLine.bitLine.bit;
@@ -83,12 +97,17 @@ const OR: FC<TwoLineProps> = ({
   useEffect(() => {
     ALine.bitLineListeners.push(render);
     BLine.bitLineListeners.push(render);
-    //bitLineListeners.push(render);
-    //TODO: These all need to be removed on unmount
+
+    return () => {
+      removeElementFromMany(
+        [ALine.bitLineListeners, BLine.bitLineListeners],
+        render
+      );
+    };
   }, []);
 
-  bitLine.bit = c;
-  bitLineListeners.forEach((listener) => listener());
+  CLine.bitLine.bit = c;
+  CLine.bitLineListeners.forEach((listener) => listener());
 
   return (
     <div
@@ -103,27 +122,18 @@ const OR: FC<TwoLineProps> = ({
   );
 };
 
-const AND: FC<TwoLineProps> = ({
-  bitLine,
-  position,
-  bitLineListeners,
-  ALine,
-  BLine,
-}) => {
-  const render = useRender();
+const AND: FC<TwoLineProps> = ({ position, CLine, ALine, BLine }) => {
   const a = ALine.bitLine.bit;
   const b = BLine.bitLine.bit;
   const c = a && b;
 
-  useEffect(() => {
-    ALine.bitLineListeners.push(render);
-    BLine.bitLineListeners.push(render);
-    //bitLineListeners.push(render);
-    //TODO: These all need to be removed on unmount
-  }, []);
+  useTwoLineMount(ALine, BLine);
 
-  bitLine.bit = c;
-  bitLineListeners.forEach((listener) => listener());
+  //If the state isn't going to change, do not propogate it as it's unesccessary
+  if (CLine.bitLine.bit !== c) {
+    CLine.bitLine.bit = c;
+    CLine.bitLineListeners.forEach((listener) => listener());
+  }
 
   return (
     <div
@@ -138,21 +148,20 @@ const AND: FC<TwoLineProps> = ({
   );
 };
 
-const BitNode: FC<BitNodeProps> = ({ bitLine, bitLineListeners, position }) => {
+const BitNode: FC<BitNodeProps> = ({ CLine, position }) => {
   const render = useRender();
 
   useEffect(() => {
-    bitLineListeners.push(render);
+    CLine.bitLineListeners.push(render);
 
     return () => {
-      const renderIndex = bitLineListeners.indexOf(render);
-      bitLineListeners.splice(renderIndex, 1);
+      removeElement(CLine.bitLineListeners, render);
     };
   }, []);
 
   const handleClick = () => {
-    bitLine.bit = !bitLine.bit;
-    bitLineListeners.forEach((render) => {
+    CLine.bitLine.bit = !CLine.bitLine.bit;
+    CLine.bitLineListeners.forEach((render) => {
       render();
     });
   };
@@ -165,7 +174,7 @@ const BitNode: FC<BitNodeProps> = ({ bitLine, bitLineListeners, position }) => {
         top: position[1],
         height: "12px",
         width: "12px",
-        backgroundColor: bitLine.bit ? "blue" : "white",
+        backgroundColor: CLine.bitLine.bit ? "blue" : "white",
         borderRadius: "12px",
       }}
       onClick={handleClick}
@@ -174,102 +183,64 @@ const BitNode: FC<BitNodeProps> = ({ bitLine, bitLineListeners, position }) => {
 };
 
 const Squidward = () => {
-  const bitLineA = { bit: false };
-  const bitLineB = { bit: false };
-  const bitLineC = { bit: false };
-  const bitLineZ = { bit: false };
-  const bitLineListenersA: (() => void)[] = [];
-  const bitLineListenersB: (() => void)[] = [];
-  const bitLineListenersC: (() => void)[] = [];
-  const bitLineListenersZ: (() => void)[] = [];
+  const bitLineA = new BitLine();
+  const bitLineB = new BitLine();
+  const bitLineC = new BitLine();
+  const bitLineZ = new BitLine();
+  // const bitLineListenersA: (() => void)[] = [];
+  // const bitLineListenersB: (() => void)[] = [];
+  // const bitLineListenersC: (() => void)[] = [];
+  // const bitLineListenersZ: (() => void)[] = [];
 
-  const bitLineA1 = { bit: false };
-  const bitLineB1 = { bit: false };
-  const bitLineC1 = { bit: false };
-  const bitLineListenersA1: (() => void)[] = [];
-  const bitLineListenersB1: (() => void)[] = [];
-  const bitLineListenersC1: (() => void)[] = [];
+  const bitLineA1 = new BitLine();
+  const bitLineB1 = new BitLine();
+  const bitLineC1 = new BitLine();
+  // const bitLineListenersA1: (() => void)[] = [];
+  // const bitLineListenersB1: (() => void)[] = [];
+  // const bitLineListenersC1: (() => void)[] = [];
 
-  const bitLineA2 = { bit: false };
-  const bitLineListenersA2: (() => void)[] = [];
-  const bitLineB2 = { bit: false };
-  const bitLineListenersB2: (() => void)[] = [];
+  const bitLineA2 = new BitLine();
+  // const bitLineListenersA2: (() => void)[] = [];
+  const bitLineB2 = new BitLine();
+  // const bitLineListenersB2: (() => void)[] = [];
 
   return (
     <div style={{ position: "relative", height: "100%" }}>
-      <BitNode
-        bitLine={bitLineA}
-        position={[500, 500]}
-        bitLineListeners={bitLineListenersA}
-      />
-      <BitNode
-        bitLine={bitLineB}
-        position={[500, 600]}
-        bitLineListeners={bitLineListenersB}
-      />
+      <BitNode CLine={bitLineA.LineWithListener} position={[500, 500]} />
+      <BitNode CLine={bitLineB.LineWithListener} position={[500, 600]} />
       <AND
-        bitLine={bitLineC}
-        bitLineListeners={bitLineListenersC}
         position={[600, 550]}
-        ALine={{ bitLine: bitLineA, bitLineListeners: bitLineListenersA }}
-        BLine={{ bitLine: bitLineB, bitLineListeners: bitLineListenersB }}
+        CLine={bitLineC.LineWithListener}
+        ALine={bitLineA.LineWithListener}
+        BLine={bitLineB.LineWithListener}
       />
-      <BitNode
-        bitLine={bitLineC}
-        bitLineListeners={bitLineListenersC}
-        position={[650, 554]}
-      />
+      <BitNode CLine={bitLineC.LineWithListener} position={[650, 554]} />
+
       <NOT
-        bitLine={bitLineZ}
-        bitLineListeners={bitLineListenersZ}
+        CLine={bitLineZ.LineWithListener}
         position={[700, 550]}
-        ALine={{ bitLine: bitLineC, bitLineListeners: bitLineListenersC }}
+        ALine={bitLineC.LineWithListener}
       />
-      <BitNode
-        bitLine={bitLineZ}
-        bitLineListeners={bitLineListenersZ}
-        position={[750, 554]}
-      />
+      <BitNode CLine={bitLineZ.LineWithListener} position={[750, 554]} />
 
-      <BitNode
-        bitLine={bitLineA1}
-        position={[500, 800]}
-        bitLineListeners={bitLineListenersA1}
-      />
-      <BitNode
-        bitLine={bitLineB1}
-        position={[500, 700]}
-        bitLineListeners={bitLineListenersB1}
-      />
+      <BitNode CLine={bitLineA1.LineWithListener} position={[500, 800]} />
+
+      <BitNode CLine={bitLineB1.LineWithListener} position={[500, 700]} />
       <OR
-        bitLine={bitLineC1}
-        bitLineListeners={bitLineListenersC1}
+        CLine={bitLineC1.LineWithListener}
         position={[600, 750]}
-        ALine={{ bitLine: bitLineA1, bitLineListeners: bitLineListenersA1 }}
-        BLine={{ bitLine: bitLineB1, bitLineListeners: bitLineListenersB1 }}
+        ALine={bitLineA1.LineWithListener}
+        BLine={bitLineB1.LineWithListener}
       />
-      <BitNode
-        bitLine={bitLineC1}
-        bitLineListeners={bitLineListenersC1}
-        position={[650, 754]}
-      />
+      <BitNode CLine={bitLineC1.LineWithListener} position={[650, 754]} />
 
-      <BitNode
-        bitLine={bitLineA2}
-        position={[500, 400]}
-        bitLineListeners={bitLineListenersA2}
-      />
+      <BitNode CLine={bitLineA2.LineWithListener} position={[500, 400]} />
       <NOT
-        bitLine={bitLineB2}
-        bitLineListeners={bitLineListenersB2}
+        CLine={bitLineB2.LineWithListener}
         position={[600, 400]}
-        ALine={{ bitLine: bitLineA2, bitLineListeners: bitLineListenersA2 }}
+        ALine={bitLineA2.LineWithListener}
       />
-      <BitNode
-        bitLine={bitLineB2}
-        bitLineListeners={bitLineListenersB2}
-        position={[650, 404]}
-      />
+      <BitNode CLine={bitLineB2.LineWithListener} position={[650, 404]} />
     </div>
   );
 };

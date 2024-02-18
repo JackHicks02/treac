@@ -1,4 +1,3 @@
-import { useJem } from "../../utils/JemStore";
 import { tabsDict } from "../../utils/TabsDict";
 import MenuListItem from "./MenuListItem";
 import SpinMoji from "./SpinMoji";
@@ -27,7 +26,7 @@ const Menu = () => {
         <SpinMoji />
         <ul>
           {Object.keys(tabsDict).map((tabKey) => (
-            <MenuListItem text={tabKey} />
+            <MenuListItem text={tabKey} key={tabKey} />
           ))}
         </ul>
       </div>
