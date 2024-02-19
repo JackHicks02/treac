@@ -1,25 +1,6 @@
 import { BitNode, XOR, AND, OR, BitLine } from "./Gates";
 import Vector from "../ProtoTypes/Vector";
 
-//This is probably unesccesarily slow even if it is more reusable
-// const and = (a: boolean, b: boolean) => {
-//   return a && b;
-// };
-
-// const or = (a: boolean, b: boolean) => {
-//   return a || b;
-// };
-
-// const not = (a: boolean) => {
-//   return !a;
-// };
-
-// Ask dem what to do here, whether this shouldn't exist and should just be replaced with the class (or something else entirely)?
-// export type LineWithListener = {
-//   bitLine: BitObj;
-//   bitLineListeners: BitLineListener[];
-// };
-
 const bitLineA0 = new BitLine();
 const bitLineB0 = new BitLine();
 const bitLineXOROut = new BitLine(); //XOR OUT

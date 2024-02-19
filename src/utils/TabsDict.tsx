@@ -7,5 +7,5 @@ type TabsDict = { [key: string]: JSX.Element };
 export const tabsDict: TabsDict = {
   "Points n Vectors": <NodesAndVectors />,
   "Ordered propogation": <Propogation />,
-  "Who knows": <Squidward />,
+  Adder: <Squidward />,
 };
