@@ -49,6 +49,7 @@ const Vector: FC<VectorProps> = ({
         height: length,
         left: myOrigin[0],
         top: myOrigin[1],
+        zIndex: 1,
         transform: `rotate(${adjustedAngle}rad) translate(-50%,0)`,
         transformOrigin: "top left",
       }}

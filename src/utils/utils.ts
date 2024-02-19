@@ -1,9 +1,8 @@
 //Anything which is a js secret object or prototype (ie arrays and functions) is pass by reference
 
 import { useEffect } from "react";
-import { render } from "react-dom";
 import { useRender } from "./useRender";
-import { LineWithListener } from "../components/Squidward/Squidward";
+import { BitLine } from "../components/Squidward/Gates";
 
 /**
  * Removes a specified element from an array.
@@ -26,24 +25,19 @@ export const removeElementFromMany = <T>(arrays: T[][], elementToRemove: T) => {
   arrays.forEach((array)=> removeElement(array, elementToRemove))
 }
 
-export const useTwoLineMount = (ALine: LineWithListener, BLine: LineWithListener, CLine?: LineWithListener) => {
+export const useTwoLineMount = (ALine: BitLine, BLine: BitLine, CLine: BitLine, newValue: any) => {
   const render = useRender();
 
   useEffect(() => {
-    ALine.bitLineListeners.push(render);
-    BLine.bitLineListeners.push(render);
+    ALine.pushSetter(render)
+    BLine.pushSetter(render);
     //This is actually pretty stupid...
     //These gates don't need to render when their lines change
     //Later on they should have nodes that reflect change or this whole thing is stupid
 
     return () =>
-      removeElementFromMany(
-        [ALine.bitLineListeners, BLine.bitLineListeners],
-        render
-      );
+        [ALine, BLine].forEach(bitLine => bitLine.removeSetter(render))
   }, []);
-  // if (bitLine.bit !== c) {
-  //   bitLine.bit = c;
-  //   bitLineListeners.forEach((listener) => listener());
-  // }
+
+    CLine.setBit(newValue);
 }
