@@ -41,3 +41,14 @@ export const useTwoLineMount = (ALine: BitLine, BLine: BitLine, CLine: BitLine, 
 
     CLine.setBit(newValue);
 }
+
+export const useOneLineMount = (BitLine: BitLine) => {
+  const render = useRender()
+ useEffect(()=> {
+  BitLine.pushSetter(render);
+
+
+  return () => BitLine.removeSetter(render)
+   }, [])
+
+}
