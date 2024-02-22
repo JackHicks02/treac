@@ -1,13 +1,17 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { Coordinate } from "../../App";
 import { BitLine } from "./Gates";
 import { useRender } from "../../utils/useRender";
 import { useOneLineMount } from "../../utils/utils";
+import { useNodeContext } from "../NAND/NANDPage";
 
 interface SquareVectorProps {
   origin: Coordinate;
   destination: Coordinate;
   bitLine: BitLine;
+  originNode?: JSX.Element;
+  destinationNode?: JSX.Element;
+  nodeMap?: Map<JSX.Element, Coordinate>;
 }
 
 const SquareVectorStyle = {
@@ -25,12 +29,26 @@ const SquareVector: FC<SquareVectorProps> = ({
   origin,
   destination,
   bitLine,
+  originNode,
+  destinationNode,
+  nodeMap,
 }) => {
+  const [_origin, setOrigin] = useState(origin);
+  const [_destination, setDestination] = useState(destination);
   useOneLineMount(bitLine);
 
-  const midX = (origin[0] + destination[0]) / 2;
-  const height = Math.abs(destination[1] - origin[1]);
-  const direction = destination[1] > origin[1] ? 1 : -1;
+  useEffect(() => {
+    if (nodeMap && originNode && destinationNode) {
+      setOrigin(nodeMap.get(originNode) ?? origin);
+      setDestination(nodeMap.get(destinationNode) ?? destination);
+    }
+  }, []);
+
+  console.log(nodeMap);
+
+  const midX = (_origin[0] + _destination[0]) / 2;
+  const height = Math.abs(_destination[1] - _origin[1]);
+  const direction = _destination[1] > _origin[1] ? 1 : -1;
   const bgColour: string = ColoursDict.get(bitLine.getBit()) ?? "red";
 
   return (
@@ -39,10 +57,10 @@ const SquareVector: FC<SquareVectorProps> = ({
         style={{
           backgroundColor: bgColour,
           position: "absolute",
-          left: origin[0],
-          top: origin[1],
+          left: _origin[0],
+          top: _origin[1],
           height: thickness,
-          width: Math.abs(midX - origin[0]) + thickness,
+          width: Math.abs(midX - _origin[0]) + thickness,
         }}
       />
       <div
@@ -50,7 +68,7 @@ const SquareVector: FC<SquareVectorProps> = ({
           backgroundColor: bgColour,
           position: "absolute",
           left: midX,
-          top: direction === 1 ? origin[1] : destination[1], // Adjust top position based on direction
+          top: direction === 1 ? _origin[1] : _destination[1],
           height: height,
           width: thickness,
         }}
@@ -60,9 +78,9 @@ const SquareVector: FC<SquareVectorProps> = ({
           backgroundColor: bgColour,
           position: "absolute",
           left: midX,
-          top: destination[1],
+          top: _destination[1],
           height: thickness,
-          width: Math.abs(destination[0] - midX),
+          width: Math.abs(_destination[0] - midX),
         }}
       />
     </>

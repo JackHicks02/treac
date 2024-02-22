@@ -10,30 +10,24 @@ import {
   useState,
 } from "react";
 
-const contexts: {
+interface ContextsInterface<T> {
   [key: string]: {
-    context: Context<MutableRefObject<Dispatch<SetStateAction<any>>[]>>;
-    detachedContext: Context<MutableRefObject<MutableRefObject<any>[]>>;
-    default: any;
+    context: Context<MutableRefObject<Dispatch<SetStateAction<T>>[]>>;
+    detachedContext: Context<MutableRefObject<MutableRefObject<T>[]>>;
+    default: T;
   };
-} = {} as {
-  [key: string]: {
-    context: Context<MutableRefObject<Dispatch<SetStateAction<any>>[]>>;
-    detachedContext: Context<MutableRefObject<MutableRefObject<any>[]>>;
-    default: any;
-  };
-};
+}
 
-function addContext(key: string, defaultValue: any) {
+const contexts: ContextsInterface<any> = {};
+
+function addContext<T>(key: string, defaultValue: T) {
   contexts[key] = {
-    context: createContext<
-      React.MutableRefObject<React.Dispatch<React.SetStateAction<any>>[]>
-    >(
-      {} as React.MutableRefObject<React.Dispatch<React.SetStateAction<any>>[]>
+    context: createContext<MutableRefObject<Dispatch<SetStateAction<T>>[]>>(
+      {} as MutableRefObject<Dispatch<SetStateAction<T>>[]>
     ),
-    detachedContext: createContext<
-      React.MutableRefObject<React.MutableRefObject<any>[]>
-    >({} as React.MutableRefObject<React.MutableRefObject<any>[]>),
+    detachedContext: createContext<MutableRefObject<MutableRefObject<T>[]>>(
+      {} as MutableRefObject<MutableRefObject<T>[]>
+    ),
     default: defaultValue,
   };
 }
@@ -155,16 +149,17 @@ export function updateJem<T>(jem: Jem<T>, to: T) {
   storage.forEach((setter) => setter(to));
 }
 
-interface JemContextProps {
+interface JemContextProps<T> {
   contextKey: string;
-  defaultValue: any;
+  defaultValue: T;
   children: React.ReactNode;
 }
-export const JemContextProvider: React.FC<JemContextProps> = ({
+
+export function JemContextProvider<T>({
   contextKey,
   children,
   defaultValue,
-}) => {
+}: JemContextProps<T>) {
   if (!Object.keys(contexts).includes(contextKey)) {
     addContext(contextKey, defaultValue);
   }
@@ -173,4 +168,4 @@ export const JemContextProvider: React.FC<JemContextProps> = ({
   const Provider = getContext(contextKey).context.Provider;
 
   return <Provider value={listenerRef}>{children}</Provider>;
-};
+}

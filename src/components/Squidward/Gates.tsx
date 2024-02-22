@@ -1,7 +1,10 @@
-import { FC, ReactNode, useEffect, useRef, useState } from "react";
+import { FC, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useRender } from "../../utils/useRender";
 import { removeElement, useTwoLineMount } from "../../utils/utils";
 import { Coordinate } from "../../App";
+import { useStyle } from "../../utils/useStyle";
+
+const centre = { transform: "translate(-50%,-50%)" };
 
 export type BitObj = { bit: boolean };
 export type BitLineListener = () => void;
@@ -61,6 +64,8 @@ export type OneLineProps = BitNodeProps & {
 export type TwoLineProps = BitNodeProps & {
   ALine: BitLine;
   BLine: BitLine;
+  nodePositions?: Map<JSX.Element, Coordinate>;
+  selfReference?: JSX.Element;
 };
 
 interface LabelProps {
@@ -85,6 +90,30 @@ const Label: FC<LabelProps> = ({ children, position }) => {
   );
 };
 
+interface DryNodeProps {
+  colour: string;
+  width: number;
+  position: Coordinate;
+  left: string;
+  top: string;
+}
+const DryNode: FC<DryNodeProps> = ({ colour, width, left, top }) => {
+  return (
+    <div
+      style={{
+        ...centre,
+        position: "absolute",
+        width: width,
+        height: width,
+        borderRadius: width,
+        backgroundColor: colour,
+        left: left,
+        top: top,
+      }}
+    />
+  );
+};
+
 export const NOT: FC<OneLineProps> = ({ position, CLine, ALine }) => {
   const render = useRender();
 
@@ -100,10 +129,18 @@ export const NOT: FC<OneLineProps> = ({ position, CLine, ALine }) => {
   return <></>;
 };
 
-export const OR: FC<TwoLineProps> = ({ position, CLine, ALine, BLine }) => {
+export const OR: FC<TwoLineProps> = ({
+  position,
+  CLine,
+  ALine,
+  BLine,
+  nodePositions,
+  selfReference,
+}) => {
   const [a, b] = [ALine.getBit(), BLine.getBit()];
 
   const c = a || b;
+
   useTwoLineMount(ALine, BLine, CLine, c);
 
   return <></>;
@@ -123,23 +160,99 @@ export const XOR: FC<TwoLineProps> = ({
   CLine,
   ALine,
   BLine,
+  nodePositions,
+  selfReference,
 }) => {
   const [a, b] = [ALine.getBit(), BLine.getBit()];
 
   const c = (a || b) && !(a && b);
   useTwoLineMount(ALine, BLine, CLine, c);
 
-  <Label position={position}>XOR</Label>;
-  return <></>;
+  useEffect(() => {
+    if (nodePositions && selfReference) {
+      nodePositions.delete(selfReference);
+      nodePositions.set(selfReference, position);
+    }
+
+    return () => {
+      if (nodePositions && selfReference) {
+        nodePositions.delete(selfReference);
+      }
+    };
+  }, []);
+
+  return <Label position={position}>XOR</Label>;
 };
 
-export const NAND: FC<TwoLineProps> = ({ position, CLine, ALine, BLine }) => {
+export const NAND: FC<TwoLineProps> = ({
+  position,
+  CLine,
+  ALine,
+  BLine,
+  nodePositions,
+  selfReference,
+}) => {
   const [a, b] = [ALine.getBit(), BLine.getBit()];
-
   const c = !(a && b);
+
+  const style = useStyle()[0];
   useTwoLineMount(ALine, BLine, CLine, c);
 
-  return <></>;
+  useEffect(() => {
+    if (nodePositions && selfReference) {
+      nodePositions.delete(selfReference);
+      nodePositions.set(selfReference, [500, 500]);
+    }
+
+    return () => {
+      if (nodePositions && selfReference) {
+        nodePositions.delete(selfReference);
+      }
+    };
+  }, []);
+
+  if (!position) {
+    return <></>;
+  } //This is worth keeping rather than enforcing so hidden logic can be carried out etc
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: position[0],
+        top: position[1],
+        width: style.gateWidth,
+        height: style.gateWidth,
+        border: "1px solid",
+        borderColor: c ? style.defaultOn : style.defaultOff,
+      }}
+    >
+      <div
+        style={{
+          ...centre,
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+        }}
+      >
+        NAND
+      </div>
+      <DryNode
+        width={style.nodeWidth}
+        colour={a ? style.defaultOn : style.defaultOff}
+        position={[0, 0]}
+        left="0"
+        top={`calc(${style.nodeWidth})`}
+      />
+      <DryNode
+        width={style.nodeWidth}
+        colour={b ? style.defaultOn : style.defaultOff}
+        position={[0, 0]}
+        left=""
+        top="80%"
+      />
+    </div>
+  );
 };
 
 export const BitNode: FC<BitNodeProps> = ({ CLine, position, label }) => {

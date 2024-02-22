@@ -5,11 +5,12 @@ import { tabsDict } from "../../utils/TabsDict";
 
 const Tab = () => {
   const tabJem = useJemListener<string>("tab");
+  const testJem = useJemListener("hello");
 
   const mouseContext = useContext(MousePositionContext)?.containerRef;
 
   return (
-    <div style={{ height: "100%" }} ref={mouseContext}>
+    <div style={{ position: "relative", height: "100%" }} ref={mouseContext}>
       {tabsDict[tabJem.getValue()]}
     </div>
   );
