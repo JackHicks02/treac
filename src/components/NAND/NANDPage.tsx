@@ -1,8 +1,7 @@
-import { Fragment, ReactNode, createContext, useContext } from "react";
+import { ReactNode, createContext, useContext } from "react";
 import { Coordinate } from "../../App";
 import { BitLine, BitNode, NAND, OR, XOR } from "../Squidward/Gates";
 import SquareVector from "../Squidward/SquareVector";
-import React from "react";
 
 export const nodeContext = createContext<Map<JSX.Element, Coordinate>>(
   new Map<JSX.Element, Coordinate>()
