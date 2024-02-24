@@ -1,6 +1,7 @@
 import NodesAndVectors from "../Pages/NodesAndVectors";
 import Propogation from "../Pages/Propogation";
 import NANDPage from "../components/NAND/NANDPage";
+import Json2Gates from "../components/Parser/Json2Gates";
 
 import Squidward from "../components/Squidward/Squidward";
 
@@ -11,4 +12,5 @@ export const tabsDict: TabsDict = {
   "Ordered propogation": <Propogation />,
   Adder: <Squidward />,
   NAND: <NANDPage />,
+  JSON: <Json2Gates />,
 };

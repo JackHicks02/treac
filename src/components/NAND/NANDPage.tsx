@@ -44,7 +44,7 @@ const NAND2GATES = () => {
   const startNode = <BitNode CLine={ALine} position={[50, 50]} />;
 
   return (
-    <div id="test">
+    <>
       <p
         style={{
           position: "absolute",
@@ -83,7 +83,7 @@ const NAND2GATES = () => {
         destinationNode={b}
         nodeMap={nodePositions}
       />
-    </div>
+    </>
   );
 };
 

@@ -7,7 +7,7 @@ import { useState } from "react";
 
 
 export const useRender = () => {
-  const force = useState<boolean>(false)[1]
-  const _render = () => force(prev=>!prev)
+  const force = useState<number>(0)[1]
+  const _render = () => force(prev=>prev + 1)
   return _render;
 }
