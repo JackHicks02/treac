@@ -1,8 +1,7 @@
 import { FC, useMemo } from "react";
-import { BitLine, BitNode } from "../Squidward/Gates";
-import SquareVector from "../Squidward/SquareVector";
+import { BitLine } from "../Squidward/Gates";
 import { Coordinate } from "../../App";
-import { NAND, SquareVectorFromObj } from "./ExtensibleGates";
+import { NAND, SquareVectorFromObj, BitNode } from "./ExtensibleGates";
 import { Dictionary } from "../../types/types";
 
 type MultiKeyDictionary<T> = Map<string[], T>; //Revisit this when you discover recursive depth
@@ -56,25 +55,32 @@ const Json2Elements = (
           bitLineObj[_key] = CLine;
         } else {
           ElementArray.push(
-            <SquareVector
+            <SquareVectorFromObj
               key={
                 JSON[entry.connect].elementProps.position +
                 "-" +
                 entry.elementProps.position
               }
+              positionObj={positionObj}
               bitLine={CLine}
-              origin={JSON[entry.connect].elementProps.position}
-              destination={entry.elementProps.position}
+              originKey={entry.connect}
+              destinationKey={_key}
             />
           );
         }
         ElementArray.unshift(
-          <BitNode key={_key} CLine={CLine} {...entry.elementProps} />
+          <BitNode
+            positionObj={positionObj}
+            key={_key}
+            keyID={_key}
+            CLine={CLine}
+            position={entry.elementProps.position}
+            {...entry.elementProps}
+          />
         );
         break;
       case "nand":
         bitLineObj[_key] = new BitLine(true);
-        positionObj["test"] = [6, 6];
 
         ElementArray.unshift(
           <NAND
@@ -90,6 +96,7 @@ const Json2Elements = (
 
         ElementArray.push(
           <SquareVectorFromObj
+            key={_key + "A"}
             positionObj={positionObj}
             originKey={entry.elementProps.A}
             destinationKey={_key + "A"}
@@ -97,14 +104,11 @@ const Json2Elements = (
           />
         );
         ElementArray.push(
-          <SquareVector
-            key={
-              JSON[entry.elementProps.B].elementProps.position +
-              "-" +
-              entry.elementProps.position
-            }
-            origin={JSON[entry.elementProps.B].elementProps.position}
-            destination={positionObj[_key + "B"] ?? [0, 0]}
+          <SquareVectorFromObj
+            key={_key + "B"}
+            positionObj={positionObj}
+            originKey={entry.elementProps.B}
+            destinationKey={_key + "B"}
             bitLine={findConnection(entry.elementProps.B, _key)!}
           />
         );
@@ -139,7 +143,7 @@ const Json2Gates: FC = () => {
     //Connect refers to the "CLine", or output line, which is defined
     a: {
       elementName: "node",
-      elementProps: { position: [100, 200], bs: 123 }, // You can stick anything in here and typescript doesn't care unfortunately so this won't catch typos
+      elementProps: { position: [100, 200], bs: 123, label: "In" }, // You can stick anything in here and typescript doesn't care unfortunately so this won't catch typos
     }, // Won't even warn the console
     b: {
       elementName: "node",
@@ -162,6 +166,14 @@ const Json2Gates: FC = () => {
         A: "b",
         B: "c",
       },
+    },
+    out: {
+      elementName: "node",
+      elementProps: {
+        position: [380, 200],
+        label: "Out",
+      },
+      connect: "bob",
     },
   };
 

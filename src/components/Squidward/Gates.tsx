@@ -194,8 +194,6 @@ export const NAND: FC<TwoLineProps> = ({
   const [a, b] = [ALine.getBit(), BLine.getBit()];
   const c = !(a && b);
 
-  console.log("a: ", a, " b: ", b, " c: ", c);
-
   const style = useStyle()[0];
   useTwoLineMount(ALine, BLine, CLine, c);
 

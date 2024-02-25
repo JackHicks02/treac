@@ -1,11 +1,22 @@
-import { FC, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import {
+  FC,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useStyle } from "../../utils/useStyle";
 import { useOneLineMount, useTwoLineMount } from "../../utils/utils";
 import { Coordinate } from "../../App";
 import { BitLine } from "../Squidward/Gates";
 import { Dictionary } from "../../types/types";
 import { gateStyle } from "../../utils/StyleContext";
+import { useRender } from "../../utils/useRender";
+
 const centre = { transform: "translate(-50%,-50%)" };
+
 interface DryNodeProps {
   colour: string;
   width: number;
@@ -25,6 +36,95 @@ const DryNode: FC<DryNodeProps> = ({ colour, width, position }) => {
         top: position[1],
       }}
     />
+  );
+};
+
+interface LabelProps {
+  children: ReactNode;
+  position: Coordinate;
+}
+const Label: FC<LabelProps> = ({ children, position }) => {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: position[0],
+        top: position[1],
+        color: "cyan",
+        zIndex: 4,
+        backgroundColor: "rgb(0,0,0,0.75)",
+      }}
+    >
+      <strong>{children}</strong>
+    </div>
+  );
+};
+
+interface BitNodeProps {
+  keyID: string;
+  position: Coordinate;
+  positionObj: Dictionary<Coordinate>;
+  CLine: BitLine;
+  label?: string;
+}
+
+export const BitNode: FC<BitNodeProps> = ({
+  CLine,
+  position,
+  positionObj,
+  label,
+  keyID,
+}) => {
+  const [centre, setMyCentre] = useState<Coordinate>(position ?? [0, 0]);
+  const [isDraggable, setIsDraggable] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const render = useRender();
+
+  useMemo(() => {
+    positionObj[keyID] = position;
+  }, []);
+
+  const handleClick = useCallback(() => {
+    CLine.setBit(!CLine.getBit());
+    setIsDraggable((prevState) => !prevState);
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
+  useEffect(() => {
+    CLine.pushSetter(render);
+
+    return () => {
+      CLine.removeSetter(render);
+    };
+  }, []);
+
+  return (
+    <>
+      <div
+        style={{
+          position: "absolute",
+          zIndex: 3,
+          left: centre[0],
+          top: centre[1],
+          height: "12px",
+          width: "12px",
+          transform: "translate(-50%, -50%)",
+          backgroundColor: CLine.getBit() ? "blue" : "white",
+          borderRadius: "12px",
+        }}
+        onClick={handleClick}
+      />
+      {label && position && (
+        <Label position={[position[0] - 12, position[1] + 6]}>{label}</Label>
+      )}
+    </>
   );
 };
 
@@ -58,16 +158,11 @@ export const NAND: FC<NANDProps> = ({
       position[1] + gateStyle.gateWidth / 3 - gateStyle.gateWidth / 2,
     ];
     positionObj[keyID + "B"] = [
-      position[0],
-      position[1] + (2 * gateStyle.gateWidth) / 3,
+      position[0] - style.gateWidth / 2,
+      position[1] + (2 * gateStyle.gateWidth) / 3 - gateStyle.gateWidth / 2,
     ];
-    positionObj[keyID] = [
-      position[0] + gateStyle.gateWidth + gateStyle.nodeWidth / 2,
-      position[1] + gateStyle.gateWidth / 2,
-    ];
+    positionObj[keyID] = [position[0] + gateStyle.gateWidth / 2, position[1]];
   }, []);
-
-  console.log("From NAND: ", positionObj);
 
   if (!position) {
     return <></>;
@@ -84,6 +179,7 @@ export const NAND: FC<NANDProps> = ({
         height: style.gateWidth,
         border: "1px solid",
         borderColor: c ? style.defaultOn : style.defaultOff,
+        borderRadius: "4px",
       }}
     >
       <div
@@ -94,7 +190,7 @@ export const NAND: FC<NANDProps> = ({
           top: "50%",
         }}
       >
-        NAND
+        <strong>NAND</strong>
       </div>
       <DryNode
         width={style.nodeWidth}
