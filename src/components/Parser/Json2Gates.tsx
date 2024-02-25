@@ -79,7 +79,12 @@ const Json2Elements = (
         );
         break;
       case "nand":
-        bitLineObj[_key] = new BitLine(true);
+        bitLineObj[_key] = new BitLine(
+          !(
+            findConnection(entry.elementProps.A, _key)!.getBit() &&
+            findConnection(entry.elementProps.B, _key)!.getBit()
+          )
+        );
 
         ElementArray.unshift(
           <NAND
@@ -113,7 +118,12 @@ const Json2Elements = (
         );
         break;
       case "binarygate":
-        bitLineObj[_key] = new BitLine(true);
+        bitLineObj[_key] = new BitLine(
+          entry.func!(
+            findConnection(entry.elementProps.A, _key)!.getBit(),
+            findConnection(entry.elementProps.B, _key)!.getBit()
+          )
+        );
 
         ElementArray.unshift(
           <BinaryGate
@@ -149,7 +159,11 @@ const Json2Elements = (
         );
         break;
       case "unarygate":
-        bitLineObj[_key] = new BitLine(true);
+        const func = entry.func as unFunc;
+
+        bitLineObj[_key] = new BitLine(
+          func(findConnection(entry.elementProps.A, _key)!.getBit())
+        );
 
         ElementArray.unshift(
           <UnaryGate

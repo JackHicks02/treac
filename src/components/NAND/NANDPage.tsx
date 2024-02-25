@@ -103,9 +103,62 @@ const NAND2GATES = () => {
       elementName: "node",
       elementProps: {
         position: [300, 50],
-        label: "OUT",
+        label: "Out",
       },
       connect: "not",
+    },
+  };
+
+  const OR: JsonGateDict = {
+    //w: 300
+    //h: 280
+    a: {
+      elementName: "node",
+      elementProps: {
+        position: [0, 70],
+        label: "A",
+      },
+    },
+    b: {
+      elementName: "node",
+      elementProps: {
+        position: [0, 210],
+        label: "B",
+      },
+    },
+    not1: {
+      elementName: "unarygate",
+      elementProps: {
+        position: [100, 70],
+        A: "a",
+        label: "NOT",
+      },
+      func: (a: boolean) => !a,
+    },
+    not2: {
+      elementName: "unarygate",
+      elementProps: {
+        A: "b",
+        position: [100, 210],
+        label: "NOT",
+      },
+      func: (a: boolean) => !a,
+    },
+    nand: {
+      elementName: "nand",
+      elementProps: {
+        A: "not1",
+        B: "not2",
+        position: [200, 140],
+      },
+    },
+    out: {
+      elementName: "node",
+      elementProps: {
+        position: [300, 140],
+        label: "Out",
+      },
+      connect: "nand",
     },
   };
 
@@ -199,6 +252,47 @@ const NAND2GATES = () => {
           }}
         >
           AND
+        </div>
+      </div>
+      <div
+        style={{
+          border: "1px dashed white",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 300,
+              height: 280,
+            }}
+          >
+            <Json2Gates dict={OR} />
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderTop: "1px dashed white",
+          }}
+        >
+          OR
         </div>
       </div>
     </div>
