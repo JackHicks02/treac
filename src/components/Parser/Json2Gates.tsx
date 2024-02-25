@@ -1,20 +1,19 @@
 import { FC, useMemo } from "react";
 import { BitLine } from "../Squidward/Gates";
 import { Coordinate } from "../../App";
-import { NAND, SquareVectorFromObj, BitNode } from "./ExtensibleGates";
-import { Dictionary } from "../../types/types";
-
-type MultiKeyDictionary<T> = Map<string[], T>; //Revisit this when you discover recursive depth
-
-type GateEntry = {
-  elementName: string;
-  elementProps: Dictionary<any>;
-  connect?: string;
-};
-
-type JsonGateDict = Dictionary<GateEntry>;
-
-type ElementArray = Array<JSX.Element>;
+import {
+  NAND,
+  SquareVectorFromObj,
+  BitNode,
+  BinaryGate,
+  UnaryGate,
+} from "./ExtensibleGates";
+import {
+  Dictionary,
+  JsonGateDict,
+  ElementArray,
+  unFunc,
+} from "../../types/types";
 
 const Json2Elements = (
   JSON: JsonGateDict,
@@ -113,6 +112,70 @@ const Json2Elements = (
           />
         );
         break;
+      case "binarygate":
+        bitLineObj[_key] = new BitLine(true);
+
+        ElementArray.unshift(
+          <BinaryGate
+            func={entry.func!}
+            key={_key}
+            keyID={_key}
+            CLine={bitLineObj[_key]}
+            ALine={findConnection(entry.elementProps.A, _key)!}
+            BLine={findConnection(entry.elementProps.B, _key)!}
+            positionObj={positionObj}
+            position={entry.elementProps.position}
+            label={entry.elementProps.label ?? "ANON"}
+          />
+        );
+
+        ElementArray.push(
+          <SquareVectorFromObj
+            key={_key + "A"}
+            positionObj={positionObj}
+            originKey={entry.elementProps.A}
+            destinationKey={_key + "A"}
+            bitLine={findConnection(entry.elementProps.A, _key)!}
+          />
+        );
+        ElementArray.push(
+          <SquareVectorFromObj
+            key={_key + "B"}
+            positionObj={positionObj}
+            originKey={entry.elementProps.B}
+            destinationKey={_key + "B"}
+            bitLine={findConnection(entry.elementProps.B, _key)!}
+          />
+        );
+        break;
+      case "unarygate":
+        bitLineObj[_key] = new BitLine(true);
+
+        ElementArray.unshift(
+          <UnaryGate
+            func={entry.func as unFunc}
+            key={_key}
+            keyID={_key}
+            CLine={bitLineObj[_key]}
+            ALine={findConnection(entry.elementProps.A, _key)!}
+            positionObj={positionObj}
+            position={entry.elementProps.position}
+            label={entry.elementProps.label ?? "ANON"}
+          />
+        );
+
+        ElementArray.push(
+          <SquareVectorFromObj
+            key={_key + "A"}
+            positionObj={positionObj}
+            originKey={entry.elementProps.A}
+            destinationKey={_key + "A"}
+            bitLine={findConnection(entry.elementProps.A, _key)!}
+          />
+        );
+
+        break;
+
       default:
         throw new Error(`No component by the name of ${entry.elementName}`);
     }
@@ -121,9 +184,14 @@ const Json2Elements = (
   return ElementArray;
 };
 
-const Json2Gates: FC = () => {
+interface Json2GatesProps {
+  dict?: JsonGateDict;
+}
+
+const Json2Gates: FC<Json2GatesProps> = ({ dict }) => {
   const bitLineObj: Dictionary<BitLine> = {};
   const positionObj: Dictionary<Coordinate> = {};
+  console.log(dict);
 
   const phatTest = (count: number): JsonGateDict => {
     let myDict: JsonGateDict = {};
@@ -139,7 +207,7 @@ const Json2Gates: FC = () => {
     return myDict;
   };
 
-  const testDict: JsonGateDict = {
+  const testDict: JsonGateDict = dict ?? {
     //Connect refers to the "CLine", or output line, which is defined
     a: {
       elementName: "node",

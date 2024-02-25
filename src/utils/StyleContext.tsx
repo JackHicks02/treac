@@ -11,9 +11,9 @@ export const gateStyle = {
   nodeWidth: 12,
   gateWidth: 60,
   defaultOff: "white",
-  defaultOn: "blue",
+  defaultOn: "rgb(225, 0, 255)",
   vectorThickness: 2,
-  vectorOn: "rgba(0,0,255,0.75)",
+  vectorOn: "rgba(255,0,255,0.75)",
   vectorOff: "rgba(255,255,255,.25)",
 };
 

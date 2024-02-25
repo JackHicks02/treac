@@ -39,7 +39,17 @@ export const useTwoLineMount = (ALine: BitLine, BLine: BitLine, CLine: BitLine, 
         [ALine, BLine].forEach(bitLine => bitLine.removeSetter(render))
   }, []);
 
-    CLine.setBit(newValue);
+  CLine.setBit(newValue);
+}
+
+export const useUnaryMount = (ALine: BitLine, CLine: BitLine, newValue: boolean) => {
+  const render = useRender()
+  useEffect(()=> {
+    ALine.pushSetter(render);
+    return () => ALine.removeSetter(render)
+  }, [])
+
+  CLine.setBit(newValue)
 }
 
 export const useOneLineMount = (BitLine: BitLine) => {
