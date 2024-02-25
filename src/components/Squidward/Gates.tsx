@@ -6,7 +6,6 @@ import { useStyle } from "../../utils/useStyle";
 
 const centre = { transform: "translate(-50%,-50%)" };
 
-export type BitObj = { bit: boolean };
 export type BitLineListener = () => void;
 
 export class BitLine {

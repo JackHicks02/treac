@@ -44,8 +44,6 @@ const SquareVector: FC<SquareVectorProps> = ({
     }
   }, []);
 
-  console.log(nodeMap);
-
   const midX = (_origin[0] + _destination[0]) / 2;
   const height = Math.abs(_destination[1] - _origin[1]);
   const direction = _destination[1] > _origin[1] ? 1 : -1;

@@ -1,8 +1,9 @@
-import { FC, useCallback, useMemo } from "react";
-import { BitLine, BitNode, NAND } from "../Squidward/Gates";
+import { FC, useMemo } from "react";
+import { BitLine, BitNode } from "../Squidward/Gates";
 import SquareVector from "../Squidward/SquareVector";
-
-type Dictionary<T> = { [key: string]: T };
+import { Coordinate } from "../../App";
+import { NAND, SquareVectorFromObj } from "./ExtensibleGates";
+import { Dictionary } from "../../types/types";
 
 type MultiKeyDictionary<T> = Map<string[], T>; //Revisit this when you discover recursive depth
 
@@ -18,7 +19,8 @@ type ElementArray = Array<JSX.Element>;
 
 const Json2Elements = (
   JSON: JsonGateDict,
-  bitLineObj: Dictionary<BitLine>
+  bitLineObj: Dictionary<BitLine>,
+  positionObj: Dictionary<Coordinate>
 ): ElementArray => {
   const ElementArray: ElementArray = [];
 
@@ -44,6 +46,8 @@ const Json2Elements = (
 
     switch (entry.elementName) {
       case "node":
+        positionObj[_key] = entry.elementProps.position;
+
         let CLine = !entry.connect
           ? new BitLine()
           : findConnection(entry.connect, _key)!;
@@ -64,34 +68,31 @@ const Json2Elements = (
             />
           );
         }
-        ElementArray.push(
+        ElementArray.unshift(
           <BitNode key={_key} CLine={CLine} {...entry.elementProps} />
         );
         break;
       case "nand":
         bitLineObj[_key] = new BitLine(true);
-        console.log(bitLineObj);
-        console.log(findConnection(entry.elementProps.A, _key)!);
+        positionObj["test"] = [6, 6];
 
-        ElementArray.push(
+        ElementArray.unshift(
           <NAND
             key={_key}
+            keyID={_key}
             CLine={bitLineObj[_key]}
             ALine={findConnection(entry.elementProps.A, _key)!}
             BLine={findConnection(entry.elementProps.B, _key)!}
-            {...entry.elementProps}
+            positionObj={positionObj}
+            position={entry.elementProps.position}
           />
         );
 
         ElementArray.push(
-          <SquareVector
-            key={
-              JSON[entry.elementProps.A].elementProps.position +
-              "-" +
-              entry.elementProps.position
-            }
-            origin={JSON[entry.elementProps.A].elementProps.position}
-            destination={entry.elementProps.position}
+          <SquareVectorFromObj
+            positionObj={positionObj}
+            originKey={entry.elementProps.A}
+            destinationKey={_key + "A"}
             bitLine={findConnection(entry.elementProps.A, _key)!}
           />
         );
@@ -103,7 +104,7 @@ const Json2Elements = (
               entry.elementProps.position
             }
             origin={JSON[entry.elementProps.B].elementProps.position}
-            destination={entry.elementProps.position}
+            destination={positionObj[_key + "B"] ?? [0, 0]}
             bitLine={findConnection(entry.elementProps.B, _key)!}
           />
         );
@@ -117,9 +118,10 @@ const Json2Elements = (
 };
 
 const Json2Gates: FC = () => {
-  const bitLineObj: { [key: string]: BitLine } = {};
+  const bitLineObj: Dictionary<BitLine> = {};
+  const positionObj: Dictionary<Coordinate> = {};
 
-  const fatTest = (count: number): JsonGateDict => {
+  const phatTest = (count: number): JsonGateDict => {
     let myDict: JsonGateDict = {};
     for (let i = 0; i < count; i++) {
       const _key = i.toString();
@@ -142,18 +144,18 @@ const Json2Gates: FC = () => {
     b: {
       elementName: "node",
       elementProps: {
-        position: [150, 150],
+        position: [220, 177],
       },
       connect: "a",
     },
     c: {
       elementName: "node",
       elementProps: {
-        position: [150, 250],
+        position: [220, 224],
       },
       connect: "a",
     },
-    nand: {
+    bob: {
       elementName: "nand",
       elementProps: {
         position: [300, 200],
@@ -163,7 +165,10 @@ const Json2Gates: FC = () => {
     },
   };
 
-  const circuit = useMemo(() => Json2Elements(testDict, bitLineObj), []); // Not risking it
+  const circuit = useMemo(
+    () => Json2Elements(testDict, bitLineObj, positionObj),
+    []
+  ); // Not risking it
 
   return <>{circuit}</>;
 };
