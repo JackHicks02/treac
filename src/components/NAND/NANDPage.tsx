@@ -33,32 +33,18 @@ const NAND2GATES = () => {
       elementName: "node",
       elementProps: { position: [0, 50], bs: 123, label: "In" }, // You can stick anything in here and typescript doesn't care unfortunately so this won't catch typos
     }, // Won't even warn the console
-    b: {
-      elementName: "node",
-      elementProps: {
-        position: [75, 30],
-      },
-      connect: "a",
-    },
-    c: {
-      elementName: "node",
-      elementProps: {
-        position: [75, 70],
-      },
-      connect: "a",
-    },
     bob: {
       elementName: "nand",
       elementProps: {
-        position: [180, 50],
-        A: "b",
-        B: "c",
+        position: [90, 50],
+        A: "a",
+        B: "a",
       },
     },
     out: {
       elementName: "node",
       elementProps: {
-        position: [280, 50],
+        position: [180, 50],
         label: "Out",
       },
       connect: "bob",
@@ -90,14 +76,22 @@ const NAND2GATES = () => {
       },
       func: (a: boolean, b: boolean) => !(a && b),
     },
-    not: {
-      elementName: "unarygate",
+    // not: {
+    //   elementName: "unarygate",
+    //   elementProps: {
+    //     A: "nand",
+    //     position: [220, 50],
+    //     label: "NOT",
+    //   },
+    //   func: (a: boolean) => !a,
+    // },
+    nand2: {
+      elementName: "nand",
       elementProps: {
-        A: "nand",
         position: [220, 50],
-        label: "NOT",
+        A: "nand",
+        B: "nand",
       },
-      func: (a: boolean) => !a,
     },
     out: {
       elementName: "node",
@@ -105,7 +99,7 @@ const NAND2GATES = () => {
         position: [300, 50],
         label: "Out",
       },
-      connect: "not",
+      connect: "nand2",
     },
   };
 
@@ -126,29 +120,27 @@ const NAND2GATES = () => {
         label: "B",
       },
     },
-    not1: {
-      elementName: "unarygate",
+    nand1: {
+      elementName: "nand",
       elementProps: {
         position: [100, 70],
         A: "a",
-        label: "NOT",
+        B: "a",
       },
-      func: (a: boolean) => !a,
     },
-    not2: {
-      elementName: "unarygate",
+    nand2: {
+      elementName: "nand",
       elementProps: {
         A: "b",
+        B: "b",
         position: [100, 210],
-        label: "NOT",
       },
-      func: (a: boolean) => !a,
     },
     nand: {
       elementName: "nand",
       elementProps: {
-        A: "not1",
-        B: "not2",
+        A: "nand1",
+        B: "nand2",
         position: [200, 140],
       },
     },
@@ -159,6 +151,67 @@ const NAND2GATES = () => {
         label: "Out",
       },
       connect: "nand",
+    },
+  };
+
+  const XOR: JsonGateDict = {
+    //w: 300
+    //h: 280
+    a: {
+      elementName: "node",
+      elementProps: {
+        position: [0, 70],
+        label: "A",
+      },
+    },
+
+    b: {
+      elementName: "node",
+      elementProps: {
+        position: [0, 210],
+        label: "B",
+      },
+    },
+
+    splitNand: {
+      elementName: "nand",
+      elementProps: {
+        position: [120, 140],
+        A: "a",
+        B: "b",
+      },
+    },
+    aNand: {
+      elementName: "nand",
+      elementProps: {
+        position: [260, 80],
+        A: "a",
+        B: "splitNand",
+      },
+    },
+    bNand: {
+      elementName: "nand",
+      elementProps: {
+        position: [260, 200],
+        A: "splitNand",
+        B: "b",
+      },
+    },
+    outNand: {
+      elementName: "nand",
+      elementProps: {
+        position: [360, 140],
+        A: "aNand",
+        B: "bNand",
+      },
+    },
+    out: {
+      elementName: "node",
+      elementProps: {
+        position: [460, 140],
+        label: "Out",
+      },
+      connect: "outNand",
     },
   };
 
@@ -195,7 +248,7 @@ const NAND2GATES = () => {
               left: "50%",
               top: "50%",
               transform: "translate(-50%, -50%)",
-              width: 280,
+              width: 180,
               height: 100,
             }}
           >
@@ -293,6 +346,47 @@ const NAND2GATES = () => {
           }}
         >
           OR
+        </div>
+      </div>
+      <div
+        style={{
+          border: "1px dashed white",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 460,
+              height: 280,
+            }}
+          >
+            <Json2Gates dict={XOR} />
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderTop: "1px dashed white",
+          }}
+        >
+          XOR
         </div>
       </div>
     </div>

@@ -31,7 +31,14 @@ function App() {
           >
             <Menu />
             <MousePositionProvider>
-              <div style={{ position: "relative" }}>
+              <div
+                style={{
+                  position: "relative",
+                  paddingRight: "8px",
+                  paddingTop: "8px",
+                  paddingLeft: "8px",
+                }}
+              >
                 <Tab />
               </div>
             </MousePositionProvider>
