@@ -285,6 +285,112 @@ const NAND2GATES = () => {
     },
   };
 
+  const DEMUX: JsonGateDict = {
+    a: {
+      elementName: "node",
+      elementProps: {
+        position: [0, 40],
+        label: "In",
+      },
+    },
+    a2: {
+      elementName: "node",
+      elementProps: {
+        position: [0, 240],
+      },
+      connect: "a",
+    },
+    s: {
+      elementName: "node",
+      elementProps: {
+        position: [20, 140],
+        label: "s",
+      },
+    },
+    s2: {
+      elementName: "node",
+      elementProps: {
+        position: [60, 140],
+      },
+      connect: "s",
+    },
+    s3: {
+      elementName: "node",
+      elementProps: {
+        position: [60, 220],
+      },
+      connect: "s2",
+    },
+    sNot: {
+      elementName: "nand",
+      elementProps: {
+        position: [120, 140],
+        A: "s2",
+        B: "s2",
+      },
+    },
+    aNand: {
+      elementName: "nand",
+      elementProps: {
+        position: [240, 50],
+        A: "a",
+        B: "sNot",
+      },
+    },
+    bNand: {
+      elementName: "nand",
+      elementProps: {
+        position: [240, 230],
+        A: "s3",
+        B: "a2",
+      },
+    },
+    aNandOut: {
+      elementName: "node",
+      elementProps: {
+        position: [300, 95],
+      },
+      connect: "aNand",
+    },
+    bNandOut: {
+      elementName: "node",
+      elementProps: {
+        position: [300, 185],
+      },
+      connect: "bNand",
+    },
+    nandA: {
+      elementName: "nand",
+      elementProps: {
+        position: [380, 95],
+        A: "aNandOut",
+        B: "aNandOut",
+      },
+    },
+    nandB: {
+      elementName: "nand",
+      elementProps: {
+        position: [380, 185],
+        A: "bNandOut",
+        B: "bNandOut",
+      },
+    },
+    outA: {
+      elementName: "node",
+      elementProps: {
+        position: [460, 95],
+      },
+      connect: "nandA",
+    },
+    outB: {
+      elementName: "node",
+      elementProps: {
+        position: [460, 185],
+      },
+      connect: "nandB",
+    },
+  };
+
   return (
     <div
       style={{
@@ -498,6 +604,47 @@ const NAND2GATES = () => {
           }}
         >
           MUX
+        </div>
+      </div>
+      <div
+        style={{
+          border: "1px dashed white",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 460,
+              height: 280,
+            }}
+          >
+            <Json2Gates dict={DEMUX} />
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderTop: "1px dashed white",
+          }}
+        >
+          DEMUX
         </div>
       </div>
     </div>
