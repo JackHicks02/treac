@@ -215,6 +215,76 @@ const NAND2GATES = () => {
     },
   };
 
+  const MUX: JsonGateDict = {
+    a: {
+      elementName: "node",
+      elementProps: {
+        position: [0, 40],
+        label: "A",
+      },
+    },
+    s: {
+      elementName: "node",
+      elementProps: {
+        position: [0, 140],
+        label: "S",
+      },
+    },
+    s2: {
+      elementName: "node",
+      elementProps: {
+        position: [90, 220],
+      },
+      connect: "s",
+    },
+    b: {
+      elementName: "node",
+      elementProps: {
+        position: [0, 240],
+        label: "B",
+      },
+    },
+    sNand: {
+      elementName: "nand",
+      elementProps: {
+        position: [120, 140],
+        A: "s",
+        B: "s",
+      },
+    },
+    aNand: {
+      elementName: "nand",
+      elementProps: {
+        position: [240, 50],
+        A: "a",
+        B: "sNand",
+      },
+    },
+    bNand: {
+      elementName: "nand",
+      elementProps: {
+        position: [240, 230],
+        A: "s2",
+        B: "b",
+      },
+    },
+    outNand: {
+      elementName: "nand",
+      elementProps: {
+        position: [360, 140],
+        A: "aNand",
+        B: "bNand",
+      },
+    },
+    out: {
+      elementName: "node",
+      elementProps: {
+        position: [460, 140],
+      },
+      connect: "outNand",
+    },
+  };
+
   return (
     <div
       style={{
@@ -387,6 +457,47 @@ const NAND2GATES = () => {
           }}
         >
           XOR
+        </div>
+      </div>
+      <div
+        style={{
+          border: "1px dashed white",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 460,
+              height: 280,
+            }}
+          >
+            <Json2Gates dict={MUX} />
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderTop: "1px dashed white",
+          }}
+        >
+          MUX
         </div>
       </div>
     </div>
