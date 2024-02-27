@@ -11,3 +11,28 @@ body {
 code {
   font-family: 'SF Mono', 'Monaco', 'Consolas', 'Menlo', 'Courier New', monospace;
 }
+
+.custom-scrollbar {
+  position: relative;
+  height: 100%;
+  background-color: black;
+  overflow: auto;
+  scrollbar-width: thin; 
+  scrollbar-color: rgba(255,192,203,0.8) black; 
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 16px; 
+  background-color: black; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(255,192,203,0.8); 
+  border-radius: 8px; 
+  border: 4px solid black; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background-color: black; 
+  border-radius: 8px; 
+}

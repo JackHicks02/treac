@@ -1,4 +1,4 @@
-import { tabsDict } from "../../utils/TabsDict";
+import { Nand2Infinity, tabsDict } from "../../utils/TabsDict";
 import MenuListItem from "./MenuListItem";
 import SpinMoji from "./SpinMoji";
 
@@ -24,11 +24,36 @@ const Menu = () => {
           down the component hierarchy from parent to child component"
         </div>
         <SpinMoji />
-        <ul>
-          {Object.keys(tabsDict).map((tabKey) => (
-            <MenuListItem text={tabKey} key={tabKey} />
-          ))}
-        </ul>
+        <div>
+          <div style={{ textAlign: "center" }}>--Experiments--</div>
+          <ul>
+            {Object.keys(tabsDict).map((tabKey) => (
+              <MenuListItem text={tabKey} key={tabKey} />
+            ))}
+          </ul>
+        </div>
+        <div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "1rem",
+            }}
+          >
+            --
+            <span>NAND 2</span>
+            <span style={{ fontSize: 28 }}>
+              <strong>∞</strong>
+            </span>
+            --
+          </div>
+          <ul>
+            {Object.keys(Nand2Infinity).map((tabKey) => (
+              <MenuListItem text={tabKey} key={tabKey} />
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

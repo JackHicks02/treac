@@ -1,8 +1,5 @@
-import App from "../App";
 import Objectionable from "../components/DOOM/Objectionable";
 import TestComponent from "../components/DOOM/TestComponent";
-import PrototypePoint from "../components/ProtoTypes/PrototypePoint";
-import PrototypeVector from "../components/ProtoTypes/PrototypeVector";
 
 const testa = new Objectionable({});
 const testb = new Objectionable({});

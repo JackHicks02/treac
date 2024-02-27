@@ -164,7 +164,6 @@ const NAND2GATES = () => {
         label: "A",
       },
     },
-
     b: {
       elementName: "node",
       elementProps: {
@@ -172,7 +171,6 @@ const NAND2GATES = () => {
         label: "B",
       },
     },
-
     splitNand: {
       elementName: "nand",
       elementProps: {

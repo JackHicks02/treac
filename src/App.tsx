@@ -37,6 +37,7 @@ function App() {
                   paddingRight: "8px",
                   paddingTop: "8px",
                   paddingLeft: "8px",
+                  overflow: "hidden",
                 }}
               >
                 <Tab />
