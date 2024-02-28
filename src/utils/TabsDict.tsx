@@ -1,3 +1,4 @@
+import CanvasTest from "../Pages/CanvasTest";
 import { GridPage } from "../Pages/GridTest";
 import NodesAndVectors from "../Pages/NodesAndVectors";
 import Propogation from "../Pages/Propogation";
@@ -15,6 +16,7 @@ export const tabsDict: TabsDict = {
   Adder: <Squidward />,
   JSON: <Json2Gates />,
   Grid: <GridPage />,
+  Canvas: <CanvasTest />,
 };
 
 export const Nand2Infinity: TabsDict = {

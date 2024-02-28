@@ -27,6 +27,7 @@ function App() {
               display: "grid",
               gridTemplateColumns: "auto 1fr",
               gap: "8px",
+              overflow: "hidden",
             }}
           >
             <Menu />
