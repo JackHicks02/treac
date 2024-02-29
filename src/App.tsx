@@ -25,6 +25,23 @@ export const useMenuContext = () => {
 };
 
 function App() {
+  useEffect(() => {
+    const overrideGlobalDragBehavior = (event: any) => {
+      event.preventDefault(); // Prevent default behavior
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = "move"; // Try 'move' instead of 'none'
+      }
+    };
+
+    document.addEventListener("dragover", overrideGlobalDragBehavior);
+    document.addEventListener("drop", overrideGlobalDragBehavior);
+
+    return () => {
+      document.removeEventListener("dragover", overrideGlobalDragBehavior);
+      document.removeEventListener("drop", overrideGlobalDragBehavior);
+    };
+  }, []);
+
   const menuRef = useRef<null | HTMLDivElement>(null);
 
   return (

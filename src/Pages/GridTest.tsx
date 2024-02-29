@@ -31,6 +31,11 @@ const GridNode: FC<GridNodeProps> = ({ gridSpace, grid, xOffset }) => {
     setValue((prev) => !prev);
   }, [grid, xOffset]);
 
+  const handleDrag = (e: any) => {
+    console.log(typeof e);
+    e.preventDefault();
+  };
+
   const handleDragEnd = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       const x = event.clientX - xOffset;
@@ -49,6 +54,7 @@ const GridNode: FC<GridNodeProps> = ({ gridSpace, grid, xOffset }) => {
       draggable={true}
       onClick={handleClick}
       onDragEnd={handleDragEnd}
+      onDrag={handleDrag}
       style={{
         position: "absolute",
         left: localGridSpace.getCoords()[0],

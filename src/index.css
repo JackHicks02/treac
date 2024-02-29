@@ -12,6 +12,19 @@ body.dragging * {
   cursor: grabbing !important;
 }
 
+body.dragging, body.dragging * {
+  cursor: grabbing !important;
+}
+
+
+[draggable="true"] {
+  cursor: grab !imporant; 
+}
+
+*:active {
+  cursor: grabbing !important; /* Force the grabbing cursor when elements are active */
+}
+
 
 code {
   font-family: 'SF Mono', 'Monaco', 'Consolas', 'Menlo', 'Courier New', monospace;
