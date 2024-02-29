@@ -5,7 +5,6 @@ import { Nand2Infinity, tabsDict } from "../../utils/TabsDict";
 
 const Tab = () => {
   const tabJem = useJemListener<string>("tab");
-  const testJem = useJemListener("hello");
 
   const mouseContext = useContext(MousePositionContext)?.containerRef;
 

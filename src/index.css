@@ -8,6 +8,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body.dragging * {
+  cursor: grabbing !important;
+}
+
+
 code {
   font-family: 'SF Mono', 'Monaco', 'Consolas', 'Menlo', 'Courier New', monospace;
 }
@@ -35,4 +40,7 @@ code {
 .custom-scrollbar::-webkit-scrollbar-track {
   background-color: black; 
   border-radius: 8px; 
+}
+.dragging {
+  cursor: grabbing !important;
 }

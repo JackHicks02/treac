@@ -1,10 +1,13 @@
+import { forwardRef } from "react";
 import { Nand2Infinity, tabsDict } from "../../utils/TabsDict";
 import MenuListItem from "./MenuListItem";
 import SpinMoji from "./SpinMoji";
 
-const Menu = () => {
+interface MenuProps {}
+
+const Menu = forwardRef<HTMLDivElement, MenuProps>((props, ref) => {
   return (
-    <div style={{ borderRight: "4px double white", padding: "8px" }}>
+    <div style={{ borderRight: "4px double white", padding: "8px" }} ref={ref}>
       <div
         style={{
           display: "flex",
@@ -57,6 +60,6 @@ const Menu = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Menu;

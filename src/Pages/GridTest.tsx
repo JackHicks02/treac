@@ -2,38 +2,53 @@ import {
   CSSProperties,
   FC,
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
-import { Coordinate } from "../App";
+import { Coordinate, useMenuContext } from "../App";
 import { useStyle } from "../utils/useStyle";
+import { useJem } from "../utils/JemStore";
 
 type GridSpace = GridItem[]; //what gridItems (points?) belong to a component
 
 interface GridNodeProps {
   grid: GridItem[][];
   gridSpace: GridItem;
+  xOffset: number;
 }
 
-const GridNode: FC<GridNodeProps> = ({ gridSpace, grid }) => {
+const GridNode: FC<GridNodeProps> = ({ gridSpace, grid, xOffset }) => {
   const [localGridSpace, setLocalGridSpace] =
     useState<typeof gridSpace>(gridSpace);
-
-  console.log(localGridSpace);
   const [value, setValue] = useState<boolean>(false);
   const style = useStyle()[0];
 
   const handleClick = useCallback(() => {
     setValue((prev) => !prev);
-    setLocalGridSpace((prev) => grid[prev.x + 1][prev.y + 1]);
-  }, []);
+  }, [grid, xOffset]);
+
+  const handleDragEnd = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      const x = event.clientX - xOffset;
+      const y = event.clientY;
+      let nearestX = Math.round(x / GridItem.gap);
+      let nearestY = Math.round(y / GridItem.gap);
+      nearestX = Math.max(0, Math.min(nearestX, grid.length - 1));
+      nearestY = Math.max(0, Math.min(nearestY, grid[0].length - 1));
+      setLocalGridSpace(grid[nearestX][nearestY]);
+    },
+    [grid, xOffset]
+  );
 
   return (
     <div
-      onClick={handleClick}
       draggable={true}
+      onClick={handleClick}
+      onDragEnd={handleDragEnd}
       style={{
         position: "absolute",
         left: localGridSpace.getCoords()[0],
@@ -44,6 +59,7 @@ const GridNode: FC<GridNodeProps> = ({ gridSpace, grid }) => {
         borderRadius: style.nodeWidth,
         transform: `translate(-50%, -50%)`,
         zIndex: 0,
+        cursor: "pointer",
       }}
     />
   );
@@ -60,8 +76,14 @@ class GridItem {
     return this.coords;
   };
 
-  public constructor(x: number, y: number) {
-    this.owner = null;
+  public setOwner = (name: string): void => {
+    if (typeof this.owner) {
+      this.owner = name;
+    }
+  };
+
+  public constructor(x: number, y: number, owner = null) {
+    this.owner = owner;
     this.x = x;
     this.y = y;
     this.coords = [x * GridItem.gap, y * GridItem.gap];
@@ -90,10 +112,31 @@ const GridContainer = () => {};
 
 export const GridPage = () => {
   const [grid, setGrid] = useState<GridItem[][]>([]);
-  const [gridSize, setGridSize] = useState({ width: 100, height: 50 }); // Adjust based on your actual grid size
-  const style = useStyle()[0]; // Assuming this is where your styles are defined
+  const [gridSize, setGridSize] = useState({ width: 100, height: 50 });
+  const style = useStyle()[0];
 
-  useEffect(() => {
+  const gridRef = useRef<null | SVGSVGElement>(null);
+  const xOffset = useRef<number>(0);
+  const menuRef = useMenuContext();
+
+  const gridCallback = () => {
+    // console.log(xOffset.current);
+  };
+
+  // useEffect(() => {
+  //   window.addEventListener("mousemove", gridCallback);
+
+  //   return () => window.removeEventListener("mouseMove", gridCallback);
+  // }, []);
+
+  useLayoutEffect(() => {
+    console.log("grid ref: ", gridRef.current);
+
+    gridRef.current?.addEventListener("mousemove", gridCallback);
+
+    xOffset.current = (menuRef?.current?.clientWidth ?? 0) + 16;
+
+    console.log(xOffset.current);
     const _grid = [];
     for (let i = 0; i < 100; i++) {
       const row = [];
@@ -111,6 +154,7 @@ export const GridPage = () => {
   return (
     <>
       <svg
+        ref={gridRef}
         style={{
           position: "absolute",
         }}
@@ -120,6 +164,7 @@ export const GridPage = () => {
         {grid.map((row) =>
           row.map((gridItem) => (
             <circle
+              key={gridItem.getCoords().toString()}
               cx={gridItem.getCoords()[0]}
               cy={gridItem.getCoords()[1]}
               r="2" // Radius of the circle
@@ -134,8 +179,16 @@ export const GridPage = () => {
 
       {grid.length > 3 && grid[3].length > 2 && (
         <>
-          <GridNode gridSpace={grid[3][2]} grid={grid} />
-          <GridNode gridSpace={grid[99][49]} grid={grid} />
+          <GridNode
+            gridSpace={grid[3][2]}
+            grid={grid}
+            xOffset={xOffset.current}
+          />
+          <GridNode
+            gridSpace={grid[99][49]}
+            grid={grid}
+            xOffset={xOffset.current}
+          />
         </>
       )}
     </>

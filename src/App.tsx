@@ -1,6 +1,13 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import Menu from "./components/UI/Menu";
-import { JemContextProvider } from "./utils/JemStore";
+import { JemContextProvider, useJem } from "./utils/JemStore";
 import { tabsDict } from "./utils/TabsDict";
 import Tab from "./components/UI/Tab";
 import { MousePositionProvider } from "./utils/MousePositionContext";
@@ -10,44 +17,55 @@ export type Coordinate = [number, number];
 
 export type PointWithID = { id: string; point: JSX.Element };
 
+const MenuContext =
+  createContext<React.MutableRefObject<HTMLDivElement | null> | null>(null);
+
+export const useMenuContext = () => {
+  return useContext(MenuContext);
+};
+
 function App() {
+  const menuRef = useRef<null | HTMLDivElement>(null);
+
   return (
-    <JemContextProvider contextKey="hello" defaultValue={0}>
+    <MenuContext.Provider value={menuRef}>
       <JemContextProvider
         contextKey="tab"
         defaultValue={Object.keys(tabsDict)[0]}
       >
-        <GateStyleProvider>
-          <div
-            style={{
-              minWidth: "100vw",
-              minHeight: "100vh",
-              color: "white",
-              backgroundColor: "black",
-              display: "grid",
-              gridTemplateColumns: "auto 1fr",
-              gap: "8px",
-              overflow: "hidden",
-            }}
-          >
-            <Menu />
-            <MousePositionProvider>
-              <div
-                style={{
-                  position: "relative",
-                  paddingRight: "8px",
-                  paddingTop: "8px",
-                  paddingLeft: "8px",
-                  overflow: "hidden",
-                }}
-              >
-                <Tab />
-              </div>
-            </MousePositionProvider>
-          </div>
-        </GateStyleProvider>
+        <MousePositionProvider>
+          <GateStyleProvider>
+            <div
+              style={{
+                minWidth: "100vw",
+                minHeight: "100vh",
+                color: "white",
+                backgroundColor: "black",
+                display: "grid",
+                gridTemplateColumns: "auto 1fr",
+                gap: "8px",
+                overflow: "hidden",
+              }}
+            >
+              <Menu ref={menuRef} />
+              <MousePositionProvider>
+                <div
+                  style={{
+                    position: "relative",
+                    paddingRight: "8px",
+                    paddingTop: "8px",
+                    paddingLeft: "8px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Tab />
+                </div>
+              </MousePositionProvider>
+            </div>
+          </GateStyleProvider>
+        </MousePositionProvider>
       </JemContextProvider>
-    </JemContextProvider>
+    </MenuContext.Provider>
   );
 }
 
