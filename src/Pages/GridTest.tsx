@@ -39,7 +39,7 @@ const GridNode: FC<GridNodeProps> = ({ gridSpace, grid, xOffset }) => {
   const handleDragEnd = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       const x = event.clientX - xOffset;
-      const y = event.clientY;
+      const y = event.clientY - 8 //padding;
       let nearestX = Math.round(x / GridItem.gap);
       let nearestY = Math.round(y / GridItem.gap);
       nearestX = Math.max(0, Math.min(nearestX, grid.length - 1));
