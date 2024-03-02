@@ -1,6 +1,18 @@
-import { FC, useCallback, useLayoutEffect, useRef, useState } from "react";
+import {
+  FC,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Coordinate, useMenuContext } from "../app";
 import { useStyle } from "../utils/useStyle";
+import { BitLine } from "../components/Squidward/Gates";
+import { Dictionary } from "../types/types";
+import { gateStyle } from "../utils/StyleContext";
+import { useTwoLineMount } from "../utils/utils";
 
 type Grid = GridItem[][]; //what gridItems (points?) belong to a component
 
@@ -100,6 +112,41 @@ const GridLine: FC<GridLineProps> = ({ grid, gridSpace, xOffset, yOffset }) => {
   );
 };
 
+// export const NAND: FC<GridLineProps> = ({
+//   grid,
+//   gridSpace,
+
+// }): JSX.Element => {
+//   const style = useStyle()[0];
+
+//   const [a, b] = [ALine.getBit(), BLine.getBit()];
+//   const c = !(a && b);
+
+//   useTwoLineMount(ALine, BLine, CLine, c);
+
+//   useMemo(() => {
+//     positionObj[`${keyID}A`] = [
+//       position[0] - style.gateWidth / 2,
+//       position[1] + gateStyle.gateWidth / 3 - gateStyle.gateWidth / 2,
+//     ];
+//     positionObj[keyID + "B"] = [
+//       position[0] - style.gateWidth / 2,
+//       position[1] + (2 * gateStyle.gateWidth) / 3 - gateStyle.gateWidth / 2,
+//     ];
+//     positionObj[keyID] = [position[0] + gateStyle.gateWidth / 2, position[1]];
+//   }, []);
+
+//   if (!position) {
+//     return <></>;
+//   }
+
+//   return (
+//       <GridNode gridSpace={undefined} grid={gri} xOffset={0} yOffset={0}
+//       />
+
+//   );
+// };
+
 const GridNode: FC<GridNodeProps> = ({ gridSpace, grid, xOffset, yOffset }) => {
   const [localGridSpace, setLocalGridSpace] =
     useState<typeof gridSpace>(gridSpace);
@@ -193,6 +240,68 @@ class GridItem {
     );
   };
 }
+
+type Direction = "right" | "left" | "up" | "down";
+// const Snake: FC<GridLineProps> = ({ grid, gridSpace, xOffset, yOffset }) => {
+//   const [currentCoords, setCurrentCoords] = useState<GridItem[]>(gridSpace);
+//   const direction = useRef<Direction>("right");
+
+//   console.log(gridSpace);
+
+//   const handleMove = useCallback(
+//     (direction: Direction) => {
+//       switch (direction) {
+//         case "right":
+//           console.log([grid[currentCoords[1].x + 1][currentCoords[1].y]]);
+//           setCurrentCoords((prev) => [grid[prev[1].x + 1][prev[1].y]]);
+//           break;
+//         default:
+//           return;
+//       }
+//     },
+//     [grid, currentCoords]
+//   );
+
+//   const handleKeyPress = (e: KeyboardEvent): void => {
+//     switch (e.key) {
+//       case "d":
+//         direction.current = "right";
+//         break;
+//       case "a":
+//         direction.current = "left";
+//         break;
+//       case "w":
+//         direction.current = "up";
+//         break;
+//       case "s":
+//         direction.current = "down";
+//         break;
+//       default:
+//         return;
+//     }
+//   };
+
+//   useEffect(() => {
+//     window.addEventListener("keydown", handleKeyPress);
+//     const interval = setInterval(() => {
+//       handleMove(direction.current);
+//     }, 1000);
+
+//     return () => {
+//       clearInterval(interval);
+//       window.removeEventListener("keydown", handleKeyPress);
+//     };
+//   }, []);
+
+//   return (
+//     <GridLine
+//       grid={grid}
+//       gridSpace={currentCoords}
+//       xOffset={xOffset}
+//       yOffset={yOffset}
+//     />
+//   );
+// };
 
 const GridContainer = () => {};
 
@@ -290,6 +399,12 @@ export const GridPage = () => {
             xOffset={xOffset.current}
             yOffset={yOffset}
           />
+          {/* <Snake
+            grid={grid}
+            gridSpace={[grid[0][0], grid[1][0]]}
+            xOffset={xOffset.current}
+            yOffset={yOffset}
+          /> */}
         </>
       )}
     </>
