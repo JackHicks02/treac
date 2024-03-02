@@ -12,16 +12,66 @@ import {
 import { Coordinate, useMenuContext } from "../App";
 import { useStyle } from "../utils/useStyle";
 import { useJem } from "../utils/JemStore";
+import { useRender } from "../utils/useRender";
 
-type GridSpace = GridItem[]; //what gridItems (points?) belong to a component
+type Grid = GridItem[][]; //what gridItems (points?) belong to a component
 
-interface GridNodeProps {
-  grid: GridItem[][];
-  gridSpace: GridItem;
+interface GridComponent {
+  grid: Grid;
+  gridSpace: Grid;
   xOffset: number;
+  yOffset: number;
 }
 
-const GridNode: FC<GridNodeProps> = ({ gridSpace, grid, xOffset }) => {
+interface GridNodeProps extends Omit<GridComponent, "gridSpace"> {
+  gridSpace: GridItem;
+}
+
+interface GridLineProps extends Omit<GridComponent, "gridSpace"> {
+  gridSpace: GridItem[];
+}
+
+const GridLine: FC<GridLineProps> = ({ grid, gridSpace, xOffset, yOffset }) => {
+  const style = useStyle()[0];
+  const render = useRender();
+
+  const lines = gridSpace
+    .map((gridItem, index) => {
+      if (index < gridSpace.length - 1) {
+        const nextGridItem = gridSpace[index + 1];
+        const [x1, y1] = gridItem.getCoords();
+        const [x2, y2] = nextGridItem.getCoords();
+        return (
+          <line
+            key={`line-${index}`}
+            x1={x1 + xOffset}
+            y1={y1 + yOffset}
+            x2={x2 + xOffset}
+            y2={y2 + yOffset}
+            stroke={style.defaultOff}
+            strokeWidth={style.vectorThickness || "2"}
+          />
+        );
+      }
+      return null;
+    })
+    .filter(Boolean);
+  return (
+    <svg
+      style={{
+        position: "absolute",
+        zIndex: 2,
+        left: -xOffset,
+        top: -yOffset,
+        overflow: "visible",
+      }}
+    >
+      {lines}
+    </svg>
+  );
+};
+
+const GridNode: FC<GridNodeProps> = ({ gridSpace, grid, xOffset, yOffset }) => {
   const [localGridSpace, setLocalGridSpace] =
     useState<typeof gridSpace>(gridSpace);
   const [value, setValue] = useState<boolean>(false);
@@ -33,13 +83,14 @@ const GridNode: FC<GridNodeProps> = ({ gridSpace, grid, xOffset }) => {
 
   const handleDrag = (e: any) => {
     console.log(typeof e);
-    e.preventDefault();
   };
 
   const handleDragEnd = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
       const x = event.clientX - xOffset;
-      const y = event.clientY - 8 //padding;
+      const y = event.clientY - yOffset;
       let nearestX = Math.round(x / GridItem.gap);
       let nearestY = Math.round(y / GridItem.gap);
       nearestX = Math.max(0, Math.min(nearestX, grid.length - 1));
@@ -125,6 +176,7 @@ export const GridPage = () => {
   const xOffset = useRef<number>(0);
   const menuRef = useMenuContext();
 
+  const yOffset = 8;
   const gridCallback = () => {
     // console.log(xOffset.current);
   };
@@ -173,10 +225,10 @@ export const GridPage = () => {
               key={gridItem.getCoords().toString()}
               cx={gridItem.getCoords()[0]}
               cy={gridItem.getCoords()[1]}
-              r="2" // Radius of the circle
-              stroke="blue"
-              strokeWidth="1" // Adjust stroke-width to your liking
-              fill="blue"
+              r="2"
+              stroke="rgba(255,255,255,0.125)"
+              strokeWidth="1"
+              fill="rgba(255,255,255,0.125)"
               style={{ zIndex: 23 }}
             />
           ))
@@ -189,11 +241,19 @@ export const GridPage = () => {
             gridSpace={grid[3][2]}
             grid={grid}
             xOffset={xOffset.current}
+            yOffset={yOffset}
           />
           <GridNode
             gridSpace={grid[99][49]}
             grid={grid}
             xOffset={xOffset.current}
+            yOffset={yOffset}
+          />
+          <GridLine
+            grid={grid}
+            gridSpace={[grid[1][1], grid[1][4], grid[3][4]]}
+            xOffset={xOffset.current}
+            yOffset={yOffset}
           />
         </>
       )}
