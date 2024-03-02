@@ -1,18 +1,6 @@
-import {
-  CSSProperties,
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { Coordinate, useMenuContext } from "../App";
+import { FC, useCallback, useLayoutEffect, useRef, useState } from "react";
+import { Coordinate, useMenuContext } from "../app";
 import { useStyle } from "../utils/useStyle";
-import { useJem } from "../utils/JemStore";
-import { useRender } from "../utils/useRender";
 
 type Grid = GridItem[][]; //what gridItems (points?) belong to a component
 
@@ -31,31 +19,72 @@ interface GridLineProps extends Omit<GridComponent, "gridSpace"> {
   gridSpace: GridItem[];
 }
 
+const GridShape: FC<GridLineProps> = ({
+  grid,
+  gridSpace,
+  xOffset,
+  yOffset,
+}) => {
+  const style = useStyle()[0];
+
+  if (gridSpace.length < 3) {
+    console.error(
+      "GridPolygon expects at least three grid points to form a polygon"
+    );
+    return null;
+  }
+
+  const sides = [];
+  for (let i = 0; i < gridSpace.length; i++) {
+    const side = [gridSpace[i], gridSpace[(i + 1) % gridSpace.length]]; // Loop back to the first point after the last
+    sides.push(side);
+  }
+
+  return (
+    <svg
+      style={{
+        position: "absolute",
+        zIndex: 2,
+        left: -xOffset,
+        top: -yOffset,
+        overflow: "visible",
+      }}
+    >
+      {sides.map((side, index) => (
+        <GridLine
+          key={`side-${index}`}
+          gridSpace={side}
+          grid={grid}
+          xOffset={xOffset}
+          yOffset={yOffset}
+        />
+      ))}
+    </svg>
+  );
+};
+
 const GridLine: FC<GridLineProps> = ({ grid, gridSpace, xOffset, yOffset }) => {
   const style = useStyle()[0];
-  const render = useRender();
 
-  const lines = gridSpace
-    .map((gridItem, index) => {
-      if (index < gridSpace.length - 1) {
-        const nextGridItem = gridSpace[index + 1];
-        const [x1, y1] = gridItem.getCoords();
-        const [x2, y2] = nextGridItem.getCoords();
-        return (
-          <line
-            key={`line-${index}`}
-            x1={x1 + xOffset}
-            y1={y1 + yOffset}
-            x2={x2 + xOffset}
-            y2={y2 + yOffset}
-            stroke={style.defaultOff}
-            strokeWidth={style.vectorThickness || "2"}
-          />
-        );
-      }
-      return null;
-    })
-    .filter(Boolean);
+  const lines = gridSpace.map((gridItem, index) => {
+    if (index < gridSpace.length - 1) {
+      const nextGridItem = gridSpace[index + 1];
+      const [x1, y1] = gridItem.getCoords();
+      const [x2, y2] = nextGridItem.getCoords();
+      return (
+        <line
+          key={`line-${index}`}
+          x1={x1 + xOffset}
+          y1={y1 + yOffset}
+          x2={x2 + xOffset}
+          y2={y2 + yOffset}
+          stroke={style.defaultOff}
+          strokeWidth={style.vectorThickness || "2"}
+        />
+      );
+    }
+    return null;
+  });
   return (
     <svg
       style={{
@@ -251,7 +280,13 @@ export const GridPage = () => {
           />
           <GridLine
             grid={grid}
-            gridSpace={[grid[1][1], grid[1][4], grid[3][4]]}
+            gridSpace={[grid[1][1], grid[1][4], grid[3][4], grid[3][20]]}
+            xOffset={xOffset.current}
+            yOffset={yOffset}
+          />
+          <GridShape
+            grid={grid}
+            gridSpace={[grid[10][10], grid[14][10], grid[20][20], grid[10][20]]}
             xOffset={xOffset.current}
             yOffset={yOffset}
           />

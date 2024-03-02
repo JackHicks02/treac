@@ -24,8 +24,6 @@ body.dragging, body.dragging * {
 *:active {
   cursor: grabbing !important; /* Force the grabbing cursor when elements are active */
 
-
-
 code {
   font-family: 'SF Mono', 'Monaco', 'Consolas', 'Menlo', 'Courier New', monospace;
 }

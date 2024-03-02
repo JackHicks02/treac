@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
 import { BitLine } from "../Squidward/Gates";
-import { Coordinate } from "../../App";
+import { Coordinate } from "../../app";
 import {
   NAND,
   SquareVectorFromObj,

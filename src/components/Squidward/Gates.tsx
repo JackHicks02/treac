@@ -1,7 +1,7 @@
 import { FC, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useRender } from "../../utils/useRender";
 import { removeElement, useTwoLineMount } from "../../utils/utils";
-import { Coordinate } from "../../App";
+import { Coordinate } from "../../app";
 import { useStyle } from "../../utils/useStyle";
 
 const centre = { transform: "translate(-50%,-50%)" };

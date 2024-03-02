@@ -1,4 +1,4 @@
-import { Coordinate } from "../../App";
+import { Coordinate } from "../../app";
 
 import Point2 from "./Point2";
 import { setVectorPoint } from "./PointVector";

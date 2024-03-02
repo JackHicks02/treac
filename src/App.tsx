@@ -1,13 +1,6 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useRef } from "react";
 import Menu from "./components/UI/Menu";
-import { JemContextProvider, useJem } from "./utils/JemStore";
+import { JemContextProvider } from "./utils/JemStore";
 import { tabsDict } from "./utils/TabsDict";
 import Tab from "./components/UI/Tab";
 import { MousePositionProvider } from "./utils/MousePositionContext";
@@ -31,7 +24,7 @@ function App() {
     <MenuContext.Provider value={menuRef}>
       <JemContextProvider
         contextKey="tab"
-        defaultValue={Object.keys(tabsDict)[0]}
+        defaultValue={Object.keys(tabsDict)[4]}
       >
         <MousePositionProvider>
           <GateStyleProvider>

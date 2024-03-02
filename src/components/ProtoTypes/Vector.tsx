@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Coordinate } from "../../App";
+import { Coordinate } from "../../app";
 import { setVectorPointRef } from "./PointVector";
 
 interface VectorProps {

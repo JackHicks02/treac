@@ -1,5 +1,5 @@
 import { FC, cloneElement, useEffect, useRef } from "react";
-import { Coordinate } from "../../App";
+import { Coordinate } from "../../app";
 import { PointProps } from "./Point";
 import Vector from "./Vector";
 import PrototypePoint from "./PrototypePoint";

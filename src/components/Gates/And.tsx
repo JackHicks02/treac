@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Coordinate } from "../../App";
+import { Coordinate } from "../../app";
 
 interface ANDProps {
   centre: Coordinate;

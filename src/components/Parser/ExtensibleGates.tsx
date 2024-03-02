@@ -13,7 +13,7 @@ import {
   useTwoLineMount,
   useUnaryMount,
 } from "../../utils/utils";
-import { Coordinate } from "../../App";
+import { Coordinate } from "../../app";
 import { BitLine } from "../Squidward/Gates";
 import { Dictionary, boolFunc, unFunc } from "../../types/types";
 import { gateStyle } from "../../utils/StyleContext";

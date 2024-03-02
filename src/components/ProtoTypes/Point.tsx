@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Coordinate } from "../../App";
+import { Coordinate } from "../../app";
 import { useMouseContext } from "./MousePositionContext";
 import { setVectorPointRef } from "./PointVector";
 

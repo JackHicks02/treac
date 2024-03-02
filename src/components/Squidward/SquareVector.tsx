@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Coordinate } from "../../App";
+import { Coordinate } from "../../app";
 import { BitLine } from "./Gates";
 import { useRender } from "../../utils/useRender";
 import { useOneLineMount } from "../../utils/utils";
