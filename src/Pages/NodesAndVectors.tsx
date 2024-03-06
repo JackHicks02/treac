@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import MousePositionProvider from "../components/ProtoTypes/MousePositionContext";
 import PrototypePoint from "../components/ProtoTypes/PrototypePoint";
 import PrototypeVector from "../components/ProtoTypes/PrototypeVector";
 

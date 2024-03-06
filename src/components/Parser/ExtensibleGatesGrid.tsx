@@ -3,7 +3,6 @@ import {
   ReactNode,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useState,
 } from "react";
@@ -18,6 +17,7 @@ import { BitLine } from "../Squidward/Gates";
 import { Dictionary, boolFunc, unFunc } from "../../types/types";
 import { gateStyle } from "../../utils/StyleContext";
 import { useRender } from "../../utils/useRender";
+import { GridItem } from "./Json2Grid";
 const centre = { transform: "translate(-50%,-50%)" };
 
 interface DryNodeProps {
@@ -65,8 +65,8 @@ const Label: FC<LabelProps> = ({ children, position }) => {
 
 interface BitNodeProps {
   keyID: string;
-  position: Coordinate;
-  positionObj: Dictionary<Coordinate>;
+  position: GridItem;
+  positionObj: Dictionary<GridItem>;
   CLine: BitLine;
   label?: string;
 }
@@ -78,7 +78,7 @@ export const BitNode: FC<BitNodeProps> = ({
   label,
   keyID,
 }) => {
-  const [centre, setMyCentre] = useState<Coordinate>(position ?? [0, 0]);
+  const [gridItem, setGridItem] = useState<GridItem>(position);
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const render = useRender();
@@ -115,8 +115,8 @@ export const BitNode: FC<BitNodeProps> = ({
         style={{
           position: "absolute",
           zIndex: 3,
-          left: centre[0],
-          top: centre[1],
+          left: gridItem.getCoords()[0],
+          top: gridItem.getCoords()[1],
           height: "12px",
           width: "12px",
           transform: "translate(-50%, -50%)",
@@ -126,7 +126,11 @@ export const BitNode: FC<BitNodeProps> = ({
         onClick={handleClick}
       />
       {label && position && (
-        <Label position={[position[0] - 12, position[1] + 6]}>{label}</Label>
+        <Label
+          position={[gridItem.getCoords()[0] - 12, gridItem.getCoords()[1] + 6]}
+        >
+          {label}
+        </Label>
       )}
     </>
   );
@@ -137,8 +141,9 @@ interface NANDProps {
   CLine: BitLine;
   ALine: BitLine;
   BLine: BitLine;
-  positionObj: Dictionary<Coordinate>;
-  position: Coordinate;
+  positionObj: Dictionary<GridItem>;
+  position: GridItem;
+  grid: GridItem[][];
 }
 
 export const NAND: FC<NANDProps> = ({
@@ -148,6 +153,7 @@ export const NAND: FC<NANDProps> = ({
   BLine,
   positionObj,
   keyID,
+  grid,
 }): JSX.Element => {
   const style = useStyle()[0];
 
@@ -157,15 +163,9 @@ export const NAND: FC<NANDProps> = ({
   useTwoLineMount(ALine, BLine, CLine, c);
 
   useMemo(() => {
-    positionObj[`${keyID}A`] = [
-      position[0] - style.gateWidth / 2,
-      position[1] + gateStyle.gateWidth / 3 - gateStyle.gateWidth / 2,
-    ];
-    positionObj[keyID + "B"] = [
-      position[0] - style.gateWidth / 2,
-      position[1] + (2 * gateStyle.gateWidth) / 3 - gateStyle.gateWidth / 2,
-    ];
-    positionObj[keyID] = [position[0] + gateStyle.gateWidth / 2, position[1]];
+    positionObj[`${keyID}A`] = grid[position.x - 1][position.y - 1];
+    positionObj[keyID + "B"] = grid[position.x - 2][position.y - 2];
+    positionObj[keyID] = grid[position.x + 2][position.y];
   }, []);
 
   if (!position) {
@@ -177,8 +177,8 @@ export const NAND: FC<NANDProps> = ({
       style={{
         ...centre,
         position: "absolute",
-        left: position[0],
-        top: position[1],
+        left: position.getCoords()[0],
+        top: position.getCoords()[1],
         width: style.gateWidth,
         height: style.gateWidth,
         border: "1px solid",
@@ -388,7 +388,7 @@ export const BinaryGate: FC<BinaryGate> = ({
 interface SquareVectorProps {
   originKey: string;
   destinationKey: string;
-  positionObj: Dictionary<Coordinate>;
+  positionObj: Dictionary<GridItem>;
   bitLine: BitLine;
 }
 
@@ -400,16 +400,14 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
 }) => {
   const [_origin, _setOrigin] = useState(positionObj[originKey]);
   const [_destination, _setDestination] = useState(positionObj[destinationKey]);
-  useOneLineMount(bitLine);
   const style = useStyle()[0];
 
-  console.log("SquareV: oKey", originKey);
-  console.log("SquareV: DKey", destinationKey);
-  console.log("SquareV: posOB", positionObj);
+  useOneLineMount(bitLine);
 
-  const midX = (_origin[0] + _destination[0]) / 2;
-  const height = Math.abs(_destination[1] - _origin[1]);
-  const direction = _destination[1] > _origin[1] ? 1 : -1;
+  const midX = (_origin.getCoords()[0] + _destination.getCoords()[0]) / 2;
+  const height = Math.abs(_destination.getCoords()[1] - _origin.getCoords()[1]);
+  const direction =
+    _destination.getCoords()[1] > _origin.getCoords()[0] ? 1 : -1;
   const bgColour: string = bitLine.getBit() ? style.vectorOn : style.vectorOff;
 
   return (
@@ -418,10 +416,11 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
         style={{
           backgroundColor: bgColour,
           position: "absolute",
-          left: _origin[0],
-          top: _origin[1],
+          left: _origin.getCoords()[0],
+          top: _origin.getCoords()[1],
           height: style.vectorThickness,
-          width: Math.abs(midX - _origin[0]) + style.vectorThickness,
+          width:
+            Math.abs(midX - _origin.getCoords()[0]) + style.vectorThickness,
         }}
       />
       <div
@@ -429,7 +428,10 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
           backgroundColor: bgColour,
           position: "absolute",
           left: midX,
-          top: direction === 1 ? _origin[1] : _destination[1],
+          top:
+            direction === 1
+              ? _origin.getCoords()[1]
+              : _destination.getCoords()[1],
           height: height,
           width: style.vectorThickness,
         }}
@@ -439,9 +441,9 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
           backgroundColor: bgColour,
           position: "absolute",
           left: midX,
-          top: _destination[1],
+          top: _destination.getCoords()[1],
           height: style.vectorThickness,
-          width: Math.abs(_destination[0] - midX),
+          width: Math.abs(_destination.getCoords()[0] - midX),
         }}
       />
     </>

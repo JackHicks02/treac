@@ -1,9 +1,9 @@
-import CanvasTest from "../Pages/CanvasTest";
 import { GridPage } from "../Pages/GridTest";
 import NodesAndVectors from "../Pages/NodesAndVectors";
 import Propogation from "../Pages/Propogation";
 import NAND2GATES from "../components/NAND/NANDPage";
 import Json2Gates from "../components/Parser/Json2Gates";
+import Json2Grid from "../components/Parser/Json2Grid";
 
 import Squidward from "../components/Squidward/Squidward";
 import { Dictionary } from "../types/types";
@@ -15,8 +15,8 @@ export const tabsDict: TabsDict = {
   "Ordered propogation": <Propogation />,
   Adder: <Squidward />,
   JSON: <Json2Gates />,
-  Grid: <GridPage />,
-  Canvas: <CanvasTest />,
+  Grid: <Json2Grid />,
+  GridTest: <GridPage />,
 };
 
 export const Nand2Infinity: TabsDict = {
