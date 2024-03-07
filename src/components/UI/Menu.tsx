@@ -26,7 +26,7 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>((props, ref) => {
           "<strong>Remember</strong>: React uses one-way data flow, passing data
           down the component hierarchy from parent to child component"
         </div>
-        <SpinMoji />
+        {/* <SpinMoji /> */}
         <div>
           <div style={{ textAlign: "center" }}>--Experiments--</div>
           <ul>

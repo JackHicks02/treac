@@ -1,4 +1,11 @@
-import { FC, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  FC,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { BitLine } from "../Squidward/Gates";
 import { Coordinate, useMenuContext } from "../../app";
 import {
@@ -16,7 +23,7 @@ import {
 } from "../../types/types";
 
 export class GridItem {
-  public static readonly gap: number = 24;
+  public static readonly gap: number = 12;
   public readonly x: number;
   public readonly y: number;
   private coords: Coordinate;
@@ -250,8 +257,10 @@ interface Json2GatesProps {
 
 const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
   const [grid, setGrid] = useState<GridItem[][]>([]);
-  const [gridSize, _setGridSize] = useState({ width: 100, height: 50 });
+  const [gridSize, _setGridSize] = useState({ width: 200, height: 100 });
   const [testDict, setTestDict] = useState<JsonGateDict>({});
+  const [showGrid, setShowGrid] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const gridRef = useRef<null | SVGSVGElement>(null);
   const xOffset = useRef<number>(0);
@@ -263,13 +272,13 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
   const xy = (x: number, y: number, _grid: GridItem[][]): GridItem =>
     _grid[x][y];
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     xOffset.current = (menuRef?.current?.clientWidth ?? 0) + 16;
 
     const _grid = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < gridSize.width; i++) {
       const row = [];
-      for (let j = 0; j < 100; j++) {
+      for (let j = 0; j < gridSize.height; j++) {
         row.push(new GridItem(i, j));
       }
       _grid.push(row);
@@ -281,7 +290,7 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
         //Connect refers to the "CLine", or output line, which is defined
         a: {
           elementName: "node",
-          elementProps: { position: xy(20, 20, _grid), bs: 123, label: "In" }, // You can stick anything in here and typescript doesn't care unfortunately so this won't catch typos
+          elementProps: { position: xy(20, 20, _grid), bs: 12311 }, // You can stick anything in here and typescript doesn't care unfortunately so this won't catch typos
         }, // Won't even warn the console
         b: {
           elementName: "node",
@@ -292,7 +301,7 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
         bob: {
           elementName: "nand",
           elementProps: {
-            position: xy(30, 21, _grid),
+            position: xy(30, 19, _grid),
             A: "a",
             B: "b",
           },
@@ -300,7 +309,7 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
         out: {
           elementName: "node",
           elementProps: {
-            position: xy(32, 22, _grid),
+            position: xy(50, 22, _grid),
             label: "Out",
           },
           connect: "bob",
@@ -309,7 +318,6 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
           elementName: "node",
           elementProps: {
             position: xy(3, 3, _grid),
-            backgroundColor: "red",
             label: "3,3",
           },
         },
@@ -317,13 +325,14 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
           elementName: "node",
           elementProps: {
             position: xy(6, 6, _grid),
-            backgroundColor: "red",
             label: "6,6",
           },
           connect: "testNode",
         },
       }
     );
+
+    setLoading(false);
   }, []);
 
   const svgWidth = gridSize.width * GridItem.gap;
@@ -334,9 +343,23 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
     [testDict]
   );
 
-  return (
+  const handleClick = (e: KeyboardEvent) => {
+    if (e.key === "1") {
+      setShowGrid((prev) => !prev);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keypress", handleClick);
+    //Jem this and the state later, mad lag
+
+    return () => window.removeEventListener("keypress", handleClick);
+  }, []);
+
+  return loading ? (
+    <div>Loading</div>
+  ) : (
     <>
-      <p style={{ position: "absolute" }}>json 2 grid test</p>
       {circuit}
       <svg
         ref={gridRef}
@@ -349,10 +372,11 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
         {grid.map((row) =>
           row.map((gridItem) => (
             <circle
+              display={showGrid ? "inline" : "none"}
               key={gridItem.getCoords().toString()}
               cx={gridItem.getCoords()[0]}
               cy={gridItem.getCoords()[1]}
-              r="2"
+              r="1"
               stroke="rgba(255,255,255,0.125)"
               strokeWidth="1"
               fill="rgba(255,255,255,0.125)"

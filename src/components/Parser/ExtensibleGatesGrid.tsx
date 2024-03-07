@@ -163,24 +163,26 @@ export const NAND: FC<NANDProps> = ({
   useTwoLineMount(ALine, BLine, CLine, c);
 
   useMemo(() => {
-    positionObj[`${keyID}A`] = grid[position.x - 1][position.y - 1];
-    positionObj[keyID + "B"] = grid[position.x - 2][position.y - 2];
-    positionObj[keyID] = grid[position.x + 2][position.y];
+    positionObj[`${keyID}A`] = grid[position.x][position.y + 1];
+    positionObj[keyID + "B"] = grid[position.x][position.y + 3];
+    positionObj[keyID] = grid[position.x + 4][position.y + 2];
   }, []);
 
   if (!position) {
     return <></>;
   } //This is worth keeping rather than enforcing so hidden logic can be carried out etc
 
+  console.log(position);
+  console.log(grid[position.x][position.y + 1].getCoords());
+
   return (
     <div
       style={{
-        ...centre,
         position: "absolute",
         left: position.getCoords()[0],
         top: position.getCoords()[1],
-        width: style.gateWidth,
-        height: style.gateWidth,
+        width: GridItem.gap * 4,
+        height: GridItem.gap * 4,
         border: "1px solid",
         borderColor: c ? style.defaultOn : style.defaultOff,
         borderRadius: "4px",
@@ -199,20 +201,17 @@ export const NAND: FC<NANDProps> = ({
       <DryNode
         width={style.nodeWidth}
         colour={a ? style.defaultOn : style.defaultOff}
-        position={[0, gateStyle.gateWidth / 3]}
+        position={[0, 1 * GridItem.gap]}
       />
       <DryNode
         width={style.nodeWidth}
         colour={b ? style.defaultOn : style.defaultOff}
-        position={[0, (2 * gateStyle.gateWidth) / 3]}
+        position={[0, 3 * GridItem.gap]}
       />
       <DryNode
         width={style.nodeWidth}
         colour={c ? style.defaultOn : style.defaultOff}
-        position={[
-          gateStyle.gateWidth + gateStyle.nodeWidth / 2,
-          gateStyle.gateWidth / 2,
-        ]}
+        position={[4 * GridItem.gap, 2 * GridItem.gap]}
       />
     </div>
   );
@@ -407,13 +406,14 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
   const midX = (_origin.getCoords()[0] + _destination.getCoords()[0]) / 2;
   const height = Math.abs(_destination.getCoords()[1] - _origin.getCoords()[1]);
   const direction =
-    _destination.getCoords()[1] > _origin.getCoords()[0] ? 1 : -1;
+    _destination.getCoords()[1] > _origin.getCoords()[1] ? 1 : -1;
   const bgColour: string = bitLine.getBit() ? style.vectorOn : style.vectorOff;
 
   return (
     <>
       <div
         style={{
+          transform: "translateY(-50%)",
           backgroundColor: bgColour,
           position: "absolute",
           left: _origin.getCoords()[0],
@@ -425,6 +425,7 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
       />
       <div
         style={{
+          transform: "translateX(-50%)",
           backgroundColor: bgColour,
           position: "absolute",
           left: midX,
@@ -438,6 +439,7 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
       />
       <div
         style={{
+          transform: "translateY(-50%)",
           backgroundColor: bgColour,
           position: "absolute",
           left: midX,
