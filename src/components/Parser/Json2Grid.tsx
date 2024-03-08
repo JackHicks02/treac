@@ -290,44 +290,61 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
         //Connect refers to the "CLine", or output line, which is defined
         a: {
           elementName: "node",
-          elementProps: { position: xy(20, 20, _grid), bs: 12311 }, // You can stick anything in here and typescript doesn't care unfortunately so this won't catch typos
-        }, // Won't even warn the console
-        b: {
-          elementName: "node",
-          elementProps: {
-            position: xy(20, 22, _grid),
-          },
+          elementProps: { position: xy(1, 3, _grid), bs: 12311 },
         },
-        bob: {
+        not: {
           elementName: "nand",
           elementProps: {
-            position: xy(30, 19, _grid),
+            position: xy(4, 1, _grid),
             A: "a",
-            B: "b",
+            B: "a",
           },
         },
         out: {
           elementName: "node",
           elementProps: {
-            position: xy(50, 22, _grid),
-            label: "Out",
+            position: xy(10, 3, _grid),
+            label: "Not",
           },
-          connect: "bob",
+          connect: "not",
         },
-        testNode: {
+
+        andA: {
+          elementName: "node",
+          elementProps: { position: xy(1, 9, _grid) },
+        },
+        andB: {
+          elementName: "node",
+          elementProps: { position: xy(1, 11, _grid) },
+        },
+        andNand: {
+          elementName: "nand",
+          elementProps: { position: xy(4, 8, _grid), A: "andA", B: "andB" },
+        },
+        andNot: {
+          elementName: "nand",
+          elementProps: {
+            position: xy(12, 8, _grid),
+            A: "andNand",
+            B: "andNand",
+          },
+        },
+        andOut: {
           elementName: "node",
           elementProps: {
-            position: xy(3, 3, _grid),
-            label: "3,3",
+            position: xy(20, 10, _grid),
+            label: "And",
           },
+          connect: "andNot",
         },
-        testNode2: {
+
+        orA: {
           elementName: "node",
-          elementProps: {
-            position: xy(6, 6, _grid),
-            label: "6,6",
-          },
-          connect: "testNode",
+          elementProps: { position: xy(1, 9, _grid) },
+        },
+        orB: {
+          elementName: "node",
+          elementProps: { position: xy(1, 11, _grid) },
         },
       }
     );
@@ -361,30 +378,20 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
   ) : (
     <>
       {circuit}
-      <svg
-        ref={gridRef}
+      <div
         style={{
           position: "absolute",
+          display: showGrid ? "block" : "none",
+          width: svgWidth,
+          height: svgHeight,
+          backgroundSize: `${GridItem.gap}px ${GridItem.gap}px`,
+          backgroundPosition: `${-0.5 * GridItem.gap}px ${
+            -0.5 * GridItem.gap
+          }px`,
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Ccircle cx='6' cy='6' r='1' stroke='rgba(255,255,255,0.125)' stroke-width='1' fill='rgba(255,255,255,0.125)'/%3E%3C/svg%3E\")",
         }}
-        width={svgWidth}
-        height={svgHeight}
-      >
-        {grid.map((row) =>
-          row.map((gridItem) => (
-            <circle
-              display={showGrid ? "inline" : "none"}
-              key={gridItem.getCoords().toString()}
-              cx={gridItem.getCoords()[0]}
-              cy={gridItem.getCoords()[1]}
-              r="1"
-              stroke="rgba(255,255,255,0.125)"
-              strokeWidth="1"
-              fill="rgba(255,255,255,0.125)"
-              style={{ zIndex: 23 }}
-            />
-          ))
-        )}
-      </svg>
+      ></div>
     </>
   );
 };

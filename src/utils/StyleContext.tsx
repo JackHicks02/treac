@@ -15,6 +15,7 @@ export const gateStyle = {
   vectorThickness: 2,
   vectorOn: "rgba(255,0,255,0.75)",
   vectorOff: "rgba(255,255,255,.25)",
+  gridGap: 24,
 };
 
 export type GateStyle = typeof gateStyle;

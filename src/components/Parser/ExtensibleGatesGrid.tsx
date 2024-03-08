@@ -24,10 +24,12 @@ interface DryNodeProps {
   colour: string;
   width: number;
   position: Coordinate;
+  className?: string;
 }
-const DryNode: FC<DryNodeProps> = ({ colour, width, position }) => {
+const DryNode: FC<DryNodeProps> = ({ colour, width, position, className }) => {
   return (
     <div
+      className={className ?? ""}
       style={{
         ...centre,
         position: "absolute",
@@ -112,6 +114,7 @@ export const BitNode: FC<BitNodeProps> = ({
   return (
     <>
       <div
+        className={CLine.getBit() ? "rainbow" : ""}
         style={{
           position: "absolute",
           zIndex: 3,
@@ -177,6 +180,7 @@ export const NAND: FC<NANDProps> = ({
 
   return (
     <div
+      className={c ? "rainbow-border" : ""}
       style={{
         position: "absolute",
         left: position.getCoords()[0],
@@ -186,6 +190,7 @@ export const NAND: FC<NANDProps> = ({
         border: "1px solid",
         borderColor: c ? style.defaultOn : style.defaultOff,
         borderRadius: "4px",
+        transform: "translate(-1px,-1px)", // border offset :^/,
       }}
     >
       <div
@@ -199,16 +204,19 @@ export const NAND: FC<NANDProps> = ({
         <strong>NAND</strong>
       </div>
       <DryNode
+        className={a ? "rainbow" : ""}
         width={style.nodeWidth}
         colour={a ? style.defaultOn : style.defaultOff}
         position={[0, 1 * GridItem.gap]}
       />
       <DryNode
+        className={b ? "rainbow" : ""}
         width={style.nodeWidth}
         colour={b ? style.defaultOn : style.defaultOff}
         position={[0, 3 * GridItem.gap]}
       />
       <DryNode
+        className={c ? "rainbow" : ""}
         width={style.nodeWidth}
         colour={c ? style.defaultOn : style.defaultOff}
         position={[4 * GridItem.gap, 2 * GridItem.gap]}
@@ -399,6 +407,7 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
 }) => {
   const [_origin, _setOrigin] = useState(positionObj[originKey]);
   const [_destination, _setDestination] = useState(positionObj[destinationKey]);
+  const isOn = bitLine.getBit();
   const style = useStyle()[0];
 
   useOneLineMount(bitLine);
@@ -412,6 +421,7 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
   return (
     <>
       <div
+        className={isOn ? "rainbow" : ""}
         style={{
           transform: "translateY(-50%)",
           backgroundColor: bgColour,
@@ -424,8 +434,9 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
         }}
       />
       <div
+        className={isOn ? "rainbow" : ""}
         style={{
-          transform: "translateX(-50%)",
+          //transform: "translate(-50%)",
           backgroundColor: bgColour,
           position: "absolute",
           left: midX,
@@ -438,6 +449,7 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
         }}
       />
       <div
+        className={isOn ? "rainbow" : ""}
         style={{
           transform: "translateY(-50%)",
           backgroundColor: bgColour,
