@@ -14,12 +14,14 @@ import {
   BitNode,
   BinaryGate,
   UnaryGate,
+  NGate,
 } from "./ExtensibleGatesGrid";
 import {
   Dictionary,
   JsonGateDict,
   ElementArray,
   unFunc,
+  nFunc,
 } from "../../types/types";
 
 export class GridItem {
@@ -108,9 +110,11 @@ const Json2Elements = (
           ElementArray.push(
             <SquareVectorFromObj
               key={
-                JSON[entry.connect].elementProps.position +
-                "-" +
-                entry.elementProps.position
+                entry.connect
+                  ? JSON[entry.connect].elementProps.position +
+                    "-" +
+                    entry.elementProps.position
+                  : _key
               }
               positionObj={positionObj}
               bitLine={CLine}
@@ -170,84 +174,59 @@ const Json2Elements = (
           />
         );
         break;
-      // case "binarygate":
-      //   bitLineObj[_key] = new BitLine(
-      //     entry.func!(
-      //       findConnection(entry.elementProps.A, _key)!.getBit(),
-      //       findConnection(entry.elementProps.B, _key)!.getBit()
-      //     )
-      //   );
 
-      //   ElementArray.unshift(
-      //     <BinaryGate
-      //       func={entry.func!}
-      //       key={_key}
-      //       keyID={_key}
-      //       CLine={bitLineObj[_key]}
-      //       ALine={findConnection(entry.elementProps.A, _key)!}
-      //       BLine={findConnection(entry.elementProps.B, _key)!}
-      //       positionObj={positionObj}
-      //       position={entry.elementProps.position}
-      //       label={entry.elementProps.label ?? "ANON"}
-      //     />
-      //   );
+      case "custom":
+        const nodes = entry.elementProps.nodes as [string, string][];
+        const label = entry.elementProps.label as string;
+        const func = entry.elementProps.func as nFunc;
+        const position = entry.elementProps.position as GridItem;
 
-      //   ElementArray.push(
-      //     <SquareVectorFromObj
-      //       key={_key + "A"}
-      //       positionObj={positionObj}
-      //       originKey={entry.elementProps.A}
-      //       destinationKey={_key + "A"}
-      //       bitLine={findConnection(entry.elementProps.A, _key)!}
-      //     />
-      //   );
-      //   ElementArray.push(
-      //     <SquareVectorFromObj
-      //       key={_key + "B"}
-      //       positionObj={positionObj}
-      //       originKey={entry.elementProps.B}
-      //       destinationKey={_key + "B"}
-      //       bitLine={findConnection(entry.elementProps.B, _key)!}
-      //     />
-      //   );
-      //   break;
-      // case "unarygate":
-      //   const func = entry.func as unFunc;
+        const ins: [string, string][] = [];
+        const outs: [string, string][] = [];
 
-      //   bitLineObj[_key] = new BitLine(
-      //     func(findConnection(entry.elementProps.A, _key)!.getBit())
-      //   );
+        nodes.forEach((node) =>
+          node[1] === "out" ? outs.push(node) : ins.push(node)
+        );
+        outs.forEach((node) => (bitLineObj[node[0]] = new BitLine()));
 
-      //   ElementArray.unshift(
-      //     <UnaryGate
-      //       func={entry.func as unFunc}
-      //       key={_key}
-      //       keyID={_key}
-      //       CLine={bitLineObj[_key]}
-      //       ALine={findConnection(entry.elementProps.A, _key)!}
-      //       positionObj={positionObj}
-      //       position={entry.elementProps.position}
-      //       label={entry.elementProps.label ?? "ANON"}
-      //     />
-      //   );
+        console.log(ins);
+        console.log(outs);
 
-      //   ElementArray.push(
-      //     <SquareVectorFromObj
-      //       key={_key + "A"}
-      //       positionObj={positionObj}
-      //       originKey={entry.elementProps.A}
-      //       destinationKey={_key + "A"}
-      //       bitLine={findConnection(entry.elementProps.A, _key)!}
-      //     />
-      //   );
+        ElementArray.unshift(
+          <NGate
+            label={label}
+            keyID={_key}
+            BitLines={{}}
+            positionObj={positionObj}
+            position={position}
+            grid={[]}
+            func={func}
+          />
+        );
 
-      //   break;
+        ins.forEach((inLine, index) => {
+          ElementArray.unshift(
+            <SquareVectorFromObj
+              key={_key + " in " + index}
+              positionObj={positionObj}
+              originKey={ins[index][1]}
+              destinationKey={_key + "B"}
+              bitLine={findConnection(ins[index][1], _key)!}
+            />
+          );
+        });
+
+        bitLineObj[_key] = new BitLine();
+
+        // ElementArray.unshift(<NGate key={_key} label={label} />);
+
+        break;
 
       default:
         throw new Error(`No component by the name of ${entry.elementName}`);
     }
   });
-
+  console.log(positionObj);
   return ElementArray;
 };
 
@@ -287,7 +266,43 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
 
     setTestDict(
       dict ?? {
-        //Connect refers to the "CLine", or output line, which is defined
+        testIn: {
+          elementName: "node",
+          elementProps: { position: xy(18, 20, _grid) },
+        },
+        testIn2: {
+          elementName: "node",
+          elementProps: { position: xy(18, 22, _grid) },
+        },
+        testIn3: {
+          elementName: "node",
+          elementProps: { position: xy(18, 24, _grid) },
+        },
+        test: {
+          elementName: "custom",
+          elementProps: {
+            position: xy(20, 20, _grid),
+            nodes: [
+              ["Left", "testIn"],
+              ["Left", "testIn2"],
+              ["Bottom", "testIn3"],
+              ["right", "out"],
+            ],
+            func: (inputs: boolean[]) => {
+              if (inputs[0] && inputs[2]) {
+                return inputs[0];
+              }
+              return [inputs[1]];
+            },
+          },
+        },
+        testOut: {
+          elementName: "node",
+          elementProps: {
+            position: xy(26, 22, _grid),
+          },
+        },
+
         a: {
           elementName: "node",
           elementProps: { position: xy(1, 3, _grid), bs: 12311 },
@@ -307,6 +322,13 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
             label: "Not",
           },
           connect: "not",
+        },
+        doubleout: {
+          elementName: "node",
+          elementProps: {
+            position: xy(12, 3, _grid),
+          },
+          connect: "out",
         },
 
         andA: {
@@ -336,15 +358,6 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
             label: "And",
           },
           connect: "andNot",
-        },
-
-        orA: {
-          elementName: "node",
-          elementProps: { position: xy(1, 9, _grid) },
-        },
-        orB: {
-          elementName: "node",
-          elementProps: { position: xy(1, 11, _grid) },
         },
       }
     );

@@ -1,5 +1,6 @@
 import { GridPage } from "../Pages/GridTest";
 import NodesAndVectors from "../Pages/NodesAndVectors";
+import Parser from "../Pages/Parser";
 import Propogation from "../Pages/Propogation";
 import NAND2GATES from "../components/NAND/NANDPage";
 import Json2Gates from "../components/Parser/Json2Gates";
@@ -17,6 +18,7 @@ export const tabsDict: TabsDict = {
   JSON: <Json2Gates />,
   Grid: <Json2Grid />,
   GridTest: <GridPage />,
+  Parser: <Parser />,
 };
 
 export const Nand2Infinity: TabsDict = {

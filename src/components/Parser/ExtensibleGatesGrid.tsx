@@ -8,13 +8,21 @@ import {
 } from "react";
 import { useStyle } from "../../utils/useStyle";
 import {
+  useNLineMount,
   useOneLineMount,
   useTwoLineMount,
   useUnaryMount,
 } from "../../utils/utils";
 import { Coordinate } from "../../app";
 import { BitLine } from "../Squidward/Gates";
-import { Dictionary, boolFunc, unFunc } from "../../types/types";
+import {
+  BitInOut,
+  Dictionary,
+  SideInput,
+  boolFunc,
+  nFunc,
+  unFunc,
+} from "../../types/types";
 import { gateStyle } from "../../utils/StyleContext";
 import { useRender } from "../../utils/useRender";
 import { GridItem } from "./Json2Grid";
@@ -139,6 +147,93 @@ export const BitNode: FC<BitNodeProps> = ({
   );
 };
 
+interface NGate {
+  label: string;
+  keyID: string;
+  BitLines: SideInput;
+  positionObj: Dictionary<GridItem>;
+  position: GridItem;
+  grid: GridItem[][];
+  func: nFunc;
+}
+
+export const NGate: FC<NGate> = ({
+  position,
+  BitLines,
+  positionObj,
+  grid,
+  keyID,
+  func,
+  label,
+}) => {
+  const style = useStyle()[0];
+
+  const a = Object.values(BitLines)
+    .filter((diBitLine) => diBitLine[0] === "in")
+    .map((diBitLine) => diBitLine[1].getBit());
+  const c = func(a);
+
+  useNLineMount(Object.values(BitLines), func(a));
+
+  useMemo(() => {
+    // positionObj[`${keyID}A`] = grid[position.x][position.y + 1];
+    // positionObj[keyID + "B"] = grid[position.x][position.y + 3];
+    // positionObj[keyID] = grid[position.x + 4][position.y + 2];
+  }, []);
+
+  console.log("position: ", position);
+  console.log("BitLines: ", BitLines);
+  console.log(positionObj);
+  console.log(keyID), console.log(func);
+  console.log(label);
+
+  return (
+    <div
+      className={c ? "rainbow-border" : ""}
+      style={{
+        position: "absolute",
+        left: position.getCoords()[0],
+        top: position.getCoords()[1],
+        width: GridItem.gap * 4,
+        height: GridItem.gap * 4,
+        border: "1px solid",
+        borderColor: c ? style.defaultOn : style.defaultOff,
+        borderRadius: "4px",
+        transform: "translate(-1px,-1px)", // border offset :^/,
+      }}
+    >
+      <div
+        style={{
+          ...centre,
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+        }}
+      >
+        <strong>NAND</strong>
+      </div>
+      <DryNode
+        className={a ? "rainbow" : ""}
+        width={style.nodeWidth}
+        colour={a ? style.defaultOn : style.defaultOff}
+        position={[0, 1 * GridItem.gap]}
+      />
+      {/* <DryNode
+        className={b ? "rainbow" : ""}
+        width={style.nodeWidth}
+        colour={b ? style.defaultOn : style.defaultOff}
+        position={[0, 3 * GridItem.gap]}
+      /> */}
+      <DryNode
+        className={c ? "rainbow" : ""}
+        width={style.nodeWidth}
+        colour={c ? style.defaultOn : style.defaultOff}
+        position={[4 * GridItem.gap, 2 * GridItem.gap]}
+      />
+    </div>
+  );
+};
+
 interface NANDProps {
   keyID: string;
   CLine: BitLine;
@@ -174,9 +269,6 @@ export const NAND: FC<NANDProps> = ({
   if (!position) {
     return <></>;
   } //This is worth keeping rather than enforcing so hidden logic can be carried out etc
-
-  console.log(position);
-  console.log(grid[position.x][position.y + 1].getCoords());
 
   return (
     <div
@@ -265,7 +357,6 @@ export const UnaryGate: FC<UnaryGate> = ({
   useMemo(() => {
     positionObj[`${keyID}A`] = [position[0] - style.gateWidth / 2, position[1]];
     positionObj[keyID] = [position[0] + gateStyle.gateWidth / 2, position[1]];
-    console.log("Ungate posOB", positionObj);
   }, []);
 
   if (!position) {

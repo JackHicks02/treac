@@ -1,8 +1,9 @@
 //Anything which is a js secret object or prototype (ie arrays and functions) is pass by reference
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useRender } from "./useRender";
 import { BitLine } from "../components/Squidward/Gates";
+import { BitInOut } from "../types/types";
 
 /**
  * Removes a specified element from an array.
@@ -25,7 +26,27 @@ export const removeElementFromMany = <T>(arrays: T[][], elementToRemove: T) => {
   arrays.forEach((array)=> removeElement(array, elementToRemove))
 }
 
-export const useTwoLineMount = (ALine: BitLine, BLine: BitLine, CLine: BitLine, newValue: any) => {
+export const useNLineMount = (nodes: BitInOut[], newValue: boolean[]) => {
+  const render = useRender();
+  const ins = useRef<BitLine[]>([])
+  const outs = useRef<BitLine[]>([])
+
+  useEffect(()=>{
+    nodes.forEach((entry)=>{
+      entry[0] === "in" ? ins.current.push(entry[1]): outs.current.push(entry[1])
+    })
+
+    ins.current.forEach(bitLine=> bitLine.pushSetter(render))
+
+    return () => {
+      ins.current.forEach(bitline => bitline.removeSetter(render))
+    }
+  }, [nodes])
+
+  outs.current.forEach((bitLine, index)=>bitLine.setBit(newValue[index]))
+}
+
+export const useTwoLineMount = (ALine: BitLine, BLine: BitLine, CLine: BitLine, newValue: boolean) => {
   const render = useRender();
 
   useEffect(() => {
@@ -56,7 +77,6 @@ export const useOneLineMount = (BitLine: BitLine) => {
   const render = useRender()
  useEffect(()=> {
   BitLine.pushSetter(render);
-
 
   return () => BitLine.removeSetter(render)
    }, [])

@@ -1,9 +1,7 @@
 import { FC, useEffect, useState } from "react";
 import { Coordinate } from "../../app";
 import { BitLine } from "./Gates";
-import { useRender } from "../../utils/useRender";
 import { useOneLineMount } from "../../utils/utils";
-import { useNodeContext } from "../NAND/NANDPage";
 
 interface SquareVectorProps {
   origin: Coordinate;
@@ -13,10 +11,6 @@ interface SquareVectorProps {
   destinationNode?: JSX.Element;
   nodeMap?: Map<JSX.Element, Coordinate>;
 }
-
-const SquareVectorStyle = {
-  backgroundColor: "white",
-};
 
 const ColoursDict = new Map<boolean, string>([
   [true, "rgba(0,0,255,0.75)"],
