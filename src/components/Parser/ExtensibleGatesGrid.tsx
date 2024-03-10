@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useStyle } from "../../utils/useStyle";
@@ -18,6 +19,8 @@ import { BitLine } from "../Squidward/Gates";
 import {
   BitInOut,
   Dictionary,
+  InOrOut,
+  Side,
   SideInput,
   boolFunc,
   nFunc,
@@ -150,7 +153,8 @@ export const BitNode: FC<BitNodeProps> = ({
 interface NGate {
   label: string;
   keyID: string;
-  BitLines: SideInput;
+  ins: [Side, string, BitLine][];
+  outs: [Side, string, BitLine][];
   positionObj: Dictionary<GridItem>;
   position: GridItem;
   grid: GridItem[][];
@@ -159,7 +163,8 @@ interface NGate {
 
 export const NGate: FC<NGate> = ({
   position,
-  BitLines,
+  ins,
+  outs,
   positionObj,
   grid,
   keyID,
@@ -167,70 +172,286 @@ export const NGate: FC<NGate> = ({
   label,
 }) => {
   const style = useStyle()[0];
+  const dimensions = useRef({
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  });
+  const rawDims = useRef({
+    width: 4,
+    height: 4,
+  });
+  //Severe brain rot limitation
+  //you break these up before passing them in so there's no way you can have ins and outs on the same side
+  //in the order they come in, outs will always be pushed to the end
+  //call it a feature!
 
-  const a = Object.values(BitLines)
-    .filter((diBitLine) => diBitLine[0] === "in")
-    .map((diBitLine) => diBitLine[1].getBit());
-  const c = func(a);
+  const inLines = ins.map((inLine) => inLine[2].getBit());
+  const OutLines = outs.map((inLine) => inLine[2].getBit());
+  const DryNodes = useRef<JSX.Element[]>([]);
 
-  useNLineMount(Object.values(BitLines), func(a));
+  const c = func(inLines);
+  const allOutputsTrue = c.every((value) => value);
+
+  const combinedInAndOut: BitInOut[] = [
+    ...ins.map((inLine) => ["in", inLine[2]] as BitInOut),
+    ...outs.map((outLine) => ["out", outLine[2]] as BitInOut),
+  ];
+
+  const a = true;
+
+  useNLineMount(combinedInAndOut, c);
 
   useMemo(() => {
-    // positionObj[`${keyID}A`] = grid[position.x][position.y + 1];
-    // positionObj[keyID + "B"] = grid[position.x][position.y + 3];
-    // positionObj[keyID] = grid[position.x + 4][position.y + 2];
+    ins.forEach(
+      (inLine) =>
+        (dimensions.current[inLine[0]] = dimensions.current[inLine[0]] + 1)
+    );
+    outs.forEach(
+      (outLine) =>
+        (dimensions.current[outLine[0]] = dimensions.current[outLine[0]] + 1)
+    );
   }, []);
 
-  console.log("position: ", position);
-  console.log("BitLines: ", BitLines);
-  console.log(positionObj);
-  console.log(keyID), console.log(func);
-  console.log(label);
+  useMemo(() => {
+    rawDims.current.width = Math.max(
+      dimensions.current.top,
+      dimensions.current.bottom,
+      4
+    ); // this is horribly unoptimised, you repeat this below
+    rawDims.current.height = Math.max(
+      dimensions.current.left,
+      dimensions.current.right,
+      4
+    );
+  }, []);
 
+  const calculateBreadth = useCallback(
+    (firstSide: number, secondSide: number) => {
+      const rawBreadth = Math.max(firstSide, secondSide);
+
+      if (rawBreadth < 3) {
+        return 4 * GridItem.gap;
+      }
+
+      console.log(GridItem.gap + rawBreadth * GridItem.gap);
+      return rawBreadth * 2 * GridItem.gap;
+    },
+    []
+  );
+
+  const width = useMemo(
+    () => calculateBreadth(dimensions.current.top, dimensions.current.bottom),
+    []
+  );
+  const height = useMemo(
+    () => calculateBreadth(dimensions.current.left, dimensions.current.right),
+    []
+  );
+
+  useMemo(() => {
+    let [leftIndex, rightIndex, topIndex, bottomIndex] = [0, 0, 0, 0];
+
+    const getGeneralOffset = (side: Side) => {
+      if (side === "left" || side === "right") {
+        if (dimensions.current[side] + 2 < rawDims.current.width) {
+          return Math.floor(
+            (rawDims.current.width - dimensions.current[side]) / 2
+          );
+        }
+      }
+      if (dimensions.current[side] + 2 < rawDims.current.height) {
+        return Math.floor(
+          (rawDims.current.height - dimensions.current[side]) / 2
+        );
+      }
+      return 0;
+    };
+
+    const leftOffset = getGeneralOffset("left");
+    const rightOffset = getGeneralOffset("right");
+    const topOffset = getGeneralOffset("top");
+    const bottomOffset = getGeneralOffset("bottom");
+
+    ins.forEach((inLine) => {
+      //This whole thing is awful
+      let x = position.x;
+      let y = position.y;
+
+      switch (inLine[0]) {
+        case "left":
+          y = y + 2 * leftIndex + 1 + leftOffset;
+          positionObj[`${keyID}left${leftIndex}`] = grid[x][y];
+          console.log(inLine[2]);
+          DryNodes.current.push(
+            <BitNode
+              positionObj={positionObj}
+              keyID={`${keyID}left${leftIndex}`}
+              position={grid[x][y]}
+              CLine={inLine[2]}
+            /> //This not being dry => an unescessary re render?
+          );
+          leftIndex++;
+          break;
+        case "right":
+          x += rawDims.current.width + rightOffset;
+          y += 2 * rightIndex + 1;
+          positionObj[`${keyID}right${rightIndex}`] = grid[x][y];
+          DryNodes.current.push(
+            <BitNode
+              positionObj={positionObj}
+              keyID={`${keyID}right${rightIndex}`}
+              position={grid[x][y]}
+              CLine={inLine[2]}
+            />
+          );
+          rightIndex++;
+          break;
+        case "top":
+          x += 2 * topIndex + 1 + topOffset;
+          positionObj[`${keyID}top${topIndex}`] = grid[x][y];
+          DryNodes.current.push(
+            <BitNode
+              positionObj={positionObj}
+              keyID={`${keyID}top${topIndex}`}
+              position={grid[x][y]}
+              CLine={inLine[2]}
+            />
+          );
+          topIndex++;
+          break;
+        case "bottom":
+          x += 2 * bottomIndex + 1 + bottomOffset;
+          y += rawDims.current.height;
+          positionObj[`${keyID}bottom${bottomIndex}`] =
+            grid[x][height / GridItem.gap];
+          DryNodes.current.push(
+            <BitNode
+              positionObj={positionObj}
+              keyID={`${keyID}bottom${bottomIndex}`}
+              position={grid[x][y]}
+              CLine={inLine[2]}
+            />
+          );
+          bottomIndex++;
+          break;
+      }
+    });
+    outs.forEach((outLine) => {
+      let x = position.x;
+      let y = position.y;
+      console.log("outLine: ", outLine);
+
+      switch (outLine[0]) {
+        case "left":
+          y += 2 * leftIndex + 1 + leftOffset;
+          positionObj[`${keyID}left${leftIndex}`] = grid[x][y];
+          DryNodes.current.push(
+            <BitNode
+              positionObj={positionObj}
+              keyID={`${keyID}left${leftIndex}`}
+              position={grid[x][y]}
+              CLine={outLine[2]}
+            />
+          );
+          leftIndex++;
+          break;
+        case "right":
+          console.log(`${keyID}right${rightIndex}`);
+          x += rawDims.current.width;
+          y += 2 * rightIndex + 1 + rightOffset;
+          positionObj[`${keyID}right${rightIndex}`] = grid[x][y];
+          DryNodes.current.push(
+            <BitNode
+              positionObj={positionObj}
+              keyID={`${keyID}right${rightIndex}`}
+              position={grid[x][y]}
+              CLine={outLine[2]}
+            />
+          );
+          rightIndex++;
+          break;
+        case "top":
+          x += 2 * topIndex + 1 + topOffset;
+          positionObj[`${keyID}top${topIndex}`] = grid[x][y];
+          DryNodes.current.push(
+            <BitNode
+              positionObj={positionObj}
+              keyID={`${keyID}top${topIndex}`}
+              position={grid[x][y]}
+              CLine={outLine[2]}
+            />
+          );
+          topIndex++;
+          break;
+        case "bottom":
+          x += 2 * bottomIndex + 1 + bottomOffset;
+          y += rawDims.current.height;
+          positionObj[`${keyID}bottom${bottomIndex}`] = grid[x][y];
+          DryNodes.current.push(
+            <BitNode
+              positionObj={positionObj}
+              keyID={`${keyID}bottom${bottomIndex}`}
+              position={grid[x][y]}
+              CLine={outLine[2]}
+            />
+          );
+          bottomIndex++;
+          break;
+      }
+    });
+  }, []);
+
+  //whole thing rainbow if all outs are true?
   return (
-    <div
-      className={c ? "rainbow-border" : ""}
-      style={{
-        position: "absolute",
-        left: position.getCoords()[0],
-        top: position.getCoords()[1],
-        width: GridItem.gap * 4,
-        height: GridItem.gap * 4,
-        border: "1px solid",
-        borderColor: c ? style.defaultOn : style.defaultOff,
-        borderRadius: "4px",
-        transform: "translate(-1px,-1px)", // border offset :^/,
-      }}
-    >
+    <>
       <div
+        className={allOutputsTrue ? "rainbow-border" : ""}
         style={{
-          ...centre,
           position: "absolute",
-          left: "50%",
-          top: "50%",
+          left: position.getCoords()[0],
+          top: position.getCoords()[1],
+          width: width,
+          height: height,
+          border: "1px solid",
+          borderColor: allOutputsTrue ? style.defaultOn : style.defaultOff,
+          borderRadius: "4px",
+          transform: "translate(-1px,-1px)", // border offset :^/,
         }}
       >
-        <strong>NAND</strong>
-      </div>
-      <DryNode
+        <div
+          style={{
+            ...centre,
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+          }}
+        >
+          <strong>{label}</strong>
+        </div>
+
+        {/* <DryNode
         className={a ? "rainbow" : ""}
         width={style.nodeWidth}
         colour={a ? style.defaultOn : style.defaultOff}
         position={[0, 1 * GridItem.gap]}
-      />
-      {/* <DryNode
+      /> */}
+        {/* <DryNode
         className={b ? "rainbow" : ""}
         width={style.nodeWidth}
         colour={b ? style.defaultOn : style.defaultOff}
         position={[0, 3 * GridItem.gap]}
-      /> */}
+      />
       <DryNode
         className={c ? "rainbow" : ""}
         width={style.nodeWidth}
         colour={c ? style.defaultOn : style.defaultOff}
         position={[4 * GridItem.gap, 2 * GridItem.gap]}
-      />
-    </div>
+      /> */}
+      </div>
+      {DryNodes.current}
+    </>
   );
 };
 
@@ -527,7 +748,7 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
       <div
         className={isOn ? "rainbow" : ""}
         style={{
-          //transform: "translate(-50%)",
+          transform: "translate(-50%)",
           backgroundColor: bgColour,
           position: "absolute",
           left: midX,

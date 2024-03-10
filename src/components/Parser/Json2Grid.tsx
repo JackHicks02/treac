@@ -22,6 +22,7 @@ import {
   ElementArray,
   unFunc,
   nFunc,
+  Side,
 } from "../../types/types";
 
 export class GridItem {
@@ -98,24 +99,23 @@ const Json2Elements = (
 
     switch (entry.elementName) {
       case "node":
+        console.log("node name: ", _key);
+        console.log("bitlines: ", bitLineObj);
+        console.log("positionObj: ", positionObj);
+        if (entry.hasOwnProperty("connect")) {
+          console.log("connection: ", entry.connect);
+        }
+
         positionObj[_key] = entry.elementProps.position;
 
-        let CLine = !entry.connect
-          ? new BitLine()
-          : findConnection(entry.connect, _key)!;
+        let CLine = !entry.connect ? new BitLine() : bitLineObj[entry.connect]!;
 
         if (!entry.connect) {
           bitLineObj[_key] = CLine;
         } else {
           ElementArray.push(
             <SquareVectorFromObj
-              key={
-                entry.connect
-                  ? JSON[entry.connect].elementProps.position +
-                    "-" +
-                    entry.elementProps.position
-                  : _key
-              }
+              key={""}
               positionObj={positionObj}
               bitLine={CLine}
               originKey={entry.connect}
@@ -176,57 +176,83 @@ const Json2Elements = (
         break;
 
       case "custom":
-        const nodes = entry.elementProps.nodes as [string, string][];
+        const nodes = entry.elementProps.nodes as [Side, string][];
         const label = entry.elementProps.label as string;
         const func = entry.elementProps.func as nFunc;
         const position = entry.elementProps.position as GridItem;
 
-        const ins: [string, string][] = [];
-        const outs: [string, string][] = [];
+        const insWithLine: [Side, string, BitLine][] = []; // the non line ones dont need to be passed or the outs don't need to have lines
+        const outsWithLine: [Side, string, BitLine][] = [];
 
-        nodes.forEach((node) =>
-          node[1] === "out" ? outs.push(node) : ins.push(node)
-        );
-        outs.forEach((node) => (bitLineObj[node[0]] = new BitLine()));
+        let outCount = 0;
+        nodes.forEach((node) => {
+          if (node[1] === "out") {
+            bitLineObj[_key + node[0] + outCount] = new BitLine();
+            outsWithLine.push([...node, bitLineObj[_key + node[0] + outCount]]);
+            outCount++;
+          } else {
+            insWithLine.push([...node, findConnection(node[1], _key)!]);
+          }
+        });
 
-        console.log(ins);
-        console.log(outs);
+        outsWithLine.forEach((node) => (bitLineObj[node[0]] = new BitLine()));
 
         ElementArray.unshift(
           <NGate
             label={label}
             keyID={_key}
-            BitLines={{}}
+            ins={insWithLine}
+            outs={outsWithLine}
             positionObj={positionObj}
             position={position}
-            grid={[]}
+            grid={grid}
             func={func}
           />
         );
 
-        ins.forEach((inLine, index) => {
-          ElementArray.unshift(
+        //pass this in later to reduce some of the fat horrible mess
+        const dimensions = {
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+        };
+        console.log("position object during element array: ", positionObj);
+        console.log("bit object in element array: ", bitLineObj);
+        console.log("position: ", entry.elementProps.position);
+
+        insWithLine.forEach((inLine) => {
+          //  positionObj[`${keyID}Left${leftIndex}`] = grid[x][y];
+          ElementArray.push(
             <SquareVectorFromObj
-              key={_key + " in " + index}
+              key={_key + inLine[0] + dimensions[inLine[0]] + "vec"}
               positionObj={positionObj}
-              originKey={ins[index][1]}
-              destinationKey={_key + "B"}
-              bitLine={findConnection(ins[index][1], _key)!}
+              originKey={inLine[1]}
+              destinationKey={_key + inLine[0] + dimensions[inLine[0]]}
+              bitLine={findConnection(inLine[1], _key)!}
             />
           );
+          dimensions[inLine[0]] = dimensions[inLine[0]] + 1;
         });
 
-        bitLineObj[_key] = new BitLine();
-
-        // ElementArray.unshift(<NGate key={_key} label={label} />);
-
+        // outsWithLine.forEach((outLine) => {
+        //   ElementArray.push(
+        //     <SquareVectorFromObj
+        //       key={_key + outLine[0] + dimensions[outLine[0]] + "vec"}
+        //       positionObj={positionObj}
+        //       originKey={outLine[1]}
+        //       destinationKey={_key + outLine[0] + dimensions[outLine[0]]}
+        //       bitLine={findConnection(outLine[1], _key)!}
+        //     />
+        //   );
+        //   dimensions[outLine[0]] = dimensions[outLine[0]] + 1;
+        // });
         break;
 
       default:
         throw new Error(`No component by the name of ${entry.elementName}`);
     }
   });
-  console.log(positionObj);
   return ElementArray;
 };
 
@@ -268,96 +294,101 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
       dict ?? {
         testIn: {
           elementName: "node",
-          elementProps: { position: xy(18, 20, _grid) },
+          elementProps: { position: xy(18, 21, _grid) },
         },
         testIn2: {
           elementName: "node",
-          elementProps: { position: xy(18, 22, _grid) },
+          elementProps: { position: xy(18, 23, _grid) },
         },
         testIn3: {
           elementName: "node",
-          elementProps: { position: xy(18, 24, _grid) },
+          elementProps: { position: xy(22, 26, _grid) },
         },
         test: {
           elementName: "custom",
           elementProps: {
             position: xy(20, 20, _grid),
             nodes: [
-              ["Left", "testIn"],
-              ["Left", "testIn2"],
-              ["Bottom", "testIn3"],
+              ["left", "testIn"], //this should be type checked in dimensions, had "Left" instead of "left" before and no error
+              ["left", "testIn2"], //and NaN is a number ofcourse...
+              ["bottom", "testIn3"], // = if test in maps exactly to "testIn" for the internal node then gg
               ["right", "out"],
             ],
             func: (inputs: boolean[]) => {
-              if (inputs[0] && inputs[2]) {
-                return inputs[0];
+              if (inputs[2]) {
+                return [inputs[1]];
               }
-              return [inputs[1]];
+              return [inputs[0]];
             },
+            label: "MUX",
           },
         },
-        testOut: {
+        testExit: {
           elementName: "node",
           elementProps: {
             position: xy(26, 22, _grid),
           },
+          connect: "testright0",
+        },
+
+        trialNode: {
+          elementName: "node",
+          elementProps: {
+            position: xy(30, 30, _grid),
+          },
+        },
+        trialNode2: {
+          elementName: "node",
+          elementProps: {
+            position: xy(40, 30, _grid),
+          },
+          connect: "trialNode",
         },
 
         a: {
           elementName: "node",
-          elementProps: { position: xy(1, 3, _grid), bs: 12311 },
-        },
-        not: {
-          elementName: "nand",
           elementProps: {
-            position: xy(4, 1, _grid),
-            A: "a",
-            B: "a",
+            position: xy(38, 40, _grid),
           },
         },
-        out: {
+        b: {
           elementName: "node",
           elementProps: {
-            position: xy(10, 3, _grid),
-            label: "Not",
+            position: xy(38, 42, _grid),
           },
-          connect: "not",
         },
-        doubleout: {
+        c: {
           elementName: "node",
           elementProps: {
-            position: xy(12, 3, _grid),
+            position: xy(38, 44, _grid),
           },
-          connect: "out",
+        },
+        d: {
+          elementName: "node",
+          elementProps: {
+            position: xy(38, 46, _grid),
+          },
         },
 
-        andA: {
-          elementName: "node",
-          elementProps: { position: xy(1, 9, _grid) },
-        },
-        andB: {
-          elementName: "node",
-          elementProps: { position: xy(1, 11, _grid) },
-        },
-        andNand: {
-          elementName: "nand",
-          elementProps: { position: xy(4, 8, _grid), A: "andA", B: "andB" },
-        },
-        andNot: {
-          elementName: "nand",
+        Adder: {
+          elementName: "custom",
           elementProps: {
-            position: xy(12, 8, _grid),
-            A: "andNand",
-            B: "andNand",
+            position: xy(40, 39, _grid),
+            nodes: [
+              ["left", "a"],
+              ["left", "b"],
+              ["left", "c"],
+              ["left", "d"],
+              ["right", "out"],
+              ["right", "out"],
+              ["right", "out"],
+              ["right", "out"],
+            ],
+            func: (inputs: boolean[]) => {
+              return [true, false, true, false];
+            },
+            label: "Adder",
           },
-        },
-        andOut: {
-          elementName: "node",
-          elementProps: {
-            position: xy(20, 10, _grid),
-            label: "And",
-          },
-          connect: "andNot",
         },
       }
     );

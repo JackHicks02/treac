@@ -41,7 +41,7 @@ export const useNLineMount = (nodes: BitInOut[], newValue: boolean[]) => {
     return () => {
       ins.current.forEach(bitline => bitline.removeSetter(render))
     }
-  }, [nodes])
+  }, [])
 
   outs.current.forEach((bitLine, index)=>bitLine.setBit(newValue[index]))
 }

@@ -2,7 +2,7 @@ import { BitLine } from "../components/Squidward/Gates";
 
 export type Dictionary<T> = { [key: string]: T };
 export type MultiKeyDictionary<T> = Map<string[], T>; //Revisit this when you discover recursive depth
-export type Side = "left" | "right" | "top " | "bottom" //can't use these as keys ffs
+export type Side = "left" | "right" | "top" | "bottom" //can't use these as keys ffs
 export type InOrOut = "in" | "out";
 export type BitInOut = [InOrOut, BitLine];
 export type SideInput = Dictionary<BitInOut>
