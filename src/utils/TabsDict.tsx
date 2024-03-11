@@ -6,7 +6,6 @@ import { multibitNot } from "../circuits";
 import NAND2GATES from "../components/NAND/NANDPage";
 import Json2Gates from "../components/Parser/Json2Gates";
 import Json2Grid from "../components/Parser/Json2Grid";
-import MultiBitNot from "../components/Parser/multibitnot";
 
 import Squidward from "../components/Squidward/Squidward";
 import { Dictionary } from "../types/types";
@@ -18,12 +17,12 @@ export const tabsDict: TabsDict = {
   "Ordered propogation": <Propogation />,
   Adder: <Squidward />,
   JSON: <Json2Gates />,
-  Grid: <Json2Grid />,
+  Grid: <Json2Grid key="grid standard" />,
   GridTest: <GridPage />,
   Parser: <Parser />,
 };
 
 export const Nand2Infinity: TabsDict = {
   "Two bit gates": <NAND2GATES />,
-  "Multi bit Not": <Json2Grid dict={multibitNot} />,
+  "Multi bit Not": <Json2Grid dict={multibitNot} height={200} key="unique" />,
 };

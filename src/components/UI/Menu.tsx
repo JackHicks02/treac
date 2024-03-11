@@ -5,7 +5,7 @@ import SpinMoji from "./SpinMoji";
 
 interface MenuProps {}
 
-const Menu = forwardRef<HTMLDivElement, MenuProps>((props, ref) => {
+const Menu = forwardRef<HTMLDivElement, MenuProps>((_props, ref) => {
   return (
     <div style={{ borderRight: "4px double white", padding: "8px" }} ref={ref}>
       <div

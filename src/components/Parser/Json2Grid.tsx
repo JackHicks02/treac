@@ -24,6 +24,7 @@ import {
   nFunc,
   Side,
 } from "../../types/types";
+import _ from "lodash";
 
 export class GridItem {
   public static readonly gap: number = 12;
@@ -268,6 +269,7 @@ export const xy = (x: number, y: number, _grid: GridItem[][]): GridItem =>
   _grid[x][y];
 
 const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
+  const localDict = useRef<JsonGateDict>(_.cloneDeep(dict ?? {}));
   const [grid, setGrid] = useState<GridItem[][]>([]);
   const [gridSize, _setGridSize] = useState({
     width: width ?? 200,
@@ -276,8 +278,6 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
   const [testDict, setDict] = useState<JsonGateDict>({});
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-
-  const modifiedDictRef = useRef<JsonGateDict>({});
   const xOffset = useRef<number>(0);
   const menuRef = useMenuContext();
 
@@ -298,12 +298,13 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
     setGrid(_grid);
 
     const positions = Object.keys(dict ?? {});
-    dict &&
+
+    Object.keys(localDict.current).length > 0 &&
       positions.forEach((_key) => {
-        if (dict[_key].elementProps.hasOwnProperty("position")) {
-          dict[_key].elementProps.position = xy(
-            dict[_key].elementProps.position[0],
-            dict[_key].elementProps.position[1],
+        if (localDict.current[_key].elementProps.hasOwnProperty("position")) {
+          localDict.current[_key].elementProps.position = xy(
+            localDict.current[_key].elementProps.position[0],
+            localDict.current[_key].elementProps.position[1],
             _grid
           );
         }
@@ -311,7 +312,7 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
     console.log(positions);
 
     setDict(
-      dict ?? {
+      (Object.keys(localDict.current).length > 0 && localDict.current) || {
         testIn: {
           elementName: "node",
           elementProps: { position: xy(18, 21, _grid) },
@@ -442,28 +443,11 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
     );
 
     setLoading(false);
+
+    return () => {
+      setLoading(true);
+    };
   }, []);
-
-  useEffect(() => {
-    if (!dict || grid.length === 0) return; // Make sure we have a dictionary and a grid
-
-    const updatedDict: JsonGateDict = {};
-    Object.entries(dict).forEach(([key, gate]) => {
-      if (gate.elementProps && Array.isArray(gate.elementProps.position)) {
-        const [x, y] = gate.elementProps.position;
-        updatedDict[key] = {
-          ...gate,
-          elementProps: {
-            ...gate.elementProps,
-            position: xy(x, y, grid), // Update the position
-          },
-        };
-      } else {
-        updatedDict[key] = gate; // Copy entry unchanged if no position array
-      }
-    });
-    modifiedDictRef.current = updatedDict; // Store the updated dictionary in the ref
-  }, [dict, grid]);
 
   const svgWidth = gridSize.width * GridItem.gap;
   const svgHeight = gridSize.height * GridItem.gap;
