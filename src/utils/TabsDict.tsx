@@ -5,6 +5,7 @@ import Propogation from "../Pages/Propogation";
 import NAND2GATES from "../components/NAND/NANDPage";
 import Json2Gates from "../components/Parser/Json2Gates";
 import Json2Grid from "../components/Parser/Json2Grid";
+import MultiBitNot from "../components/Parser/multibitnot";
 
 import Squidward from "../components/Squidward/Squidward";
 import { Dictionary } from "../types/types";
@@ -23,4 +24,5 @@ export const tabsDict: TabsDict = {
 
 export const Nand2Infinity: TabsDict = {
   "Two bit gates": <NAND2GATES />,
+  "Multi bit Not": <MultiBitNot />,
 };

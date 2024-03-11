@@ -99,13 +99,6 @@ const Json2Elements = (
 
     switch (entry.elementName) {
       case "node":
-        console.log("node name: ", _key);
-        console.log("bitlines: ", bitLineObj);
-        console.log("positionObj: ", positionObj);
-        if (entry.hasOwnProperty("connect")) {
-          console.log("connection: ", entry.connect);
-        }
-
         positionObj[_key] = entry.elementProps.position;
 
         let CLine = !entry.connect ? new BitLine() : bitLineObj[entry.connect]!;
@@ -217,9 +210,6 @@ const Json2Elements = (
           top: 0,
           bottom: 0,
         };
-        console.log("position object during element array: ", positionObj);
-        console.log("bit object in element array: ", bitLineObj);
-        console.log("position: ", entry.elementProps.position);
 
         insWithLine.forEach((inLine) => {
           //  positionObj[`${keyID}Left${leftIndex}`] = grid[x][y];
@@ -258,24 +248,29 @@ const Json2Elements = (
 
 interface Json2GatesProps {
   dict?: JsonGateDict;
+  width?: number;
+  height?: number;
 }
 
-const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
+export const xy = (x: number, y: number, _grid: GridItem[][]): GridItem =>
+  _grid[x][y];
+
+const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
   const [grid, setGrid] = useState<GridItem[][]>([]);
-  const [gridSize, _setGridSize] = useState({ width: 200, height: 100 });
+  const [gridSize, _setGridSize] = useState({
+    width: width ?? 200,
+    height: height ?? 100,
+  });
   const [testDict, setTestDict] = useState<JsonGateDict>({});
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const gridRef = useRef<null | SVGSVGElement>(null);
+  const modifiedDictRef = useRef<JsonGateDict>({});
   const xOffset = useRef<number>(0);
   const menuRef = useMenuContext();
 
   const bitLineObj: Dictionary<BitLine> = {};
   const positionObj: Dictionary<GridItem> = {};
-
-  const xy = (x: number, y: number, _grid: GridItem[][]): GridItem =>
-    _grid[x][y];
 
   useEffect(() => {
     xOffset.current = (menuRef?.current?.clientWidth ?? 0) + 16;
@@ -331,42 +326,52 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
           connect: "testright0",
         },
 
-        trialNode: {
-          elementName: "node",
-          elementProps: {
-            position: xy(30, 30, _grid),
-          },
-        },
-        trialNode2: {
-          elementName: "node",
-          elementProps: {
-            position: xy(40, 30, _grid),
-          },
-          connect: "trialNode",
-        },
-
-        a: {
+        a0: {
           elementName: "node",
           elementProps: {
             position: xy(38, 40, _grid),
           },
         },
-        b: {
+        a1: {
           elementName: "node",
           elementProps: {
             position: xy(38, 42, _grid),
           },
         },
-        c: {
+        b0: {
           elementName: "node",
           elementProps: {
             position: xy(38, 44, _grid),
           },
         },
-        d: {
+        b1: {
           elementName: "node",
           elementProps: {
             position: xy(38, 46, _grid),
+          },
+        },
+        c0: {
+          elementName: "node",
+          elementProps: {
+            position: xy(38, 48, _grid),
+          },
+        },
+        c1: {
+          elementName: "node",
+          elementProps: {
+            position: xy(38, 50, _grid),
+          },
+        },
+        d0: {
+          elementName: "node",
+          elementProps: {
+            position: xy(38, 52, _grid),
+          },
+        },
+        d1: {
+          elementName: "node",
+          elementProps: {
+            position: xy(38, 54, _grid),
           },
         },
 
@@ -375,17 +380,35 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
           elementProps: {
             position: xy(40, 39, _grid),
             nodes: [
-              ["left", "a"],
-              ["left", "b"],
-              ["left", "c"],
-              ["left", "d"],
+              ["left", "a0"],
+              ["left", "a1"],
+              ["left", "b0"],
+              ["left", "b1"],
+              ["left", "c0"],
+              ["left", "c1"],
+              ["left", "d0"],
+              ["left", "d1"],
               ["right", "out"],
               ["right", "out"],
               ["right", "out"],
               ["right", "out"],
             ],
-            func: (inputs: boolean[]) => {
-              return [true, false, true, false];
+            func: (inputs: boolean[]): boolean[] => {
+              let carry: boolean = false;
+              const out: boolean[] = Array(4).fill(false);
+
+              for (let i = 0; i < 4; i++) {
+                const total: number =
+                  (inputs[i * 2] ? 1 : 0) +
+                  (inputs[i * 2 + 1] ? 1 : 0) +
+                  (carry ? 1 : 0);
+
+                out[i] = total % 2 === 1;
+
+                carry = total > 1;
+              }
+
+              return out;
             },
             label: "Adder",
           },
@@ -395,6 +418,27 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict }) => {
 
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (!dict || grid.length === 0) return; // Make sure we have a dictionary and a grid
+
+    const updatedDict: JsonGateDict = {};
+    Object.entries(dict).forEach(([key, gate]) => {
+      if (gate.elementProps && Array.isArray(gate.elementProps.position)) {
+        const [x, y] = gate.elementProps.position;
+        updatedDict[key] = {
+          ...gate,
+          elementProps: {
+            ...gate.elementProps,
+            position: xy(x, y, grid), // Update the position
+          },
+        };
+      } else {
+        updatedDict[key] = gate; // Copy entry unchanged if no position array
+      }
+    });
+    modifiedDictRef.current = updatedDict; // Store the updated dictionary in the ref
+  }, [dict, grid]);
 
   const svgWidth = gridSize.width * GridItem.gap;
   const svgHeight = gridSize.height * GridItem.gap;

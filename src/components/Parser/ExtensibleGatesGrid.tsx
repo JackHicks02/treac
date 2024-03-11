@@ -188,7 +188,6 @@ export const NGate: FC<NGate> = ({
   //call it a feature!
 
   const inLines = ins.map((inLine) => inLine[2].getBit());
-  const OutLines = outs.map((inLine) => inLine[2].getBit());
   const DryNodes = useRef<JSX.Element[]>([]);
 
   const c = func(inLines);
@@ -198,8 +197,6 @@ export const NGate: FC<NGate> = ({
     ...ins.map((inLine) => ["in", inLine[2]] as BitInOut),
     ...outs.map((outLine) => ["out", outLine[2]] as BitInOut),
   ];
-
-  const a = true;
 
   useNLineMount(combinedInAndOut, c);
 
@@ -235,7 +232,6 @@ export const NGate: FC<NGate> = ({
         return 4 * GridItem.gap;
       }
 
-      console.log(GridItem.gap + rawBreadth * GridItem.gap);
       return rawBreadth * 2 * GridItem.gap;
     },
     []
@@ -255,15 +251,18 @@ export const NGate: FC<NGate> = ({
 
     const getGeneralOffset = (side: Side) => {
       if (side === "left" || side === "right") {
-        if (dimensions.current[side] + 2 < rawDims.current.width) {
+        if (dimensions.current[side] + 2 < rawDims.current.height) {
           return Math.floor(
-            (rawDims.current.width - dimensions.current[side]) / 2
+            (rawDims.current.height - dimensions.current[side]) / 2
           );
         }
+        return 0;
       }
-      if (dimensions.current[side] + 2 < rawDims.current.height) {
+      console.log(dimensions.current[side] + 2);
+      console.log(rawDims.current.height);
+      if (dimensions.current[side] + 2 < rawDims.current.width) {
         return Math.floor(
-          (rawDims.current.height - dimensions.current[side]) / 2
+          (rawDims.current.width - dimensions.current[side]) / 2
         );
       }
       return 0;
@@ -283,7 +282,6 @@ export const NGate: FC<NGate> = ({
         case "left":
           y = y + 2 * leftIndex + 1 + leftOffset;
           positionObj[`${keyID}left${leftIndex}`] = grid[x][y];
-          console.log(inLine[2]);
           DryNodes.current.push(
             <BitNode
               positionObj={positionObj}
@@ -341,7 +339,6 @@ export const NGate: FC<NGate> = ({
     outs.forEach((outLine) => {
       let x = position.x;
       let y = position.y;
-      console.log("outLine: ", outLine);
 
       switch (outLine[0]) {
         case "left":
@@ -358,7 +355,6 @@ export const NGate: FC<NGate> = ({
           leftIndex++;
           break;
         case "right":
-          console.log(`${keyID}right${rightIndex}`);
           x += rawDims.current.width;
           y += 2 * rightIndex + 1 + rightOffset;
           positionObj[`${keyID}right${rightIndex}`] = grid[x][y];

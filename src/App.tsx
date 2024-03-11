@@ -8,7 +8,7 @@ import {
 } from "react";
 import Menu from "./components/UI/Menu";
 import { JemContextProvider } from "./utils/JemStore";
-import { tabsDict } from "./utils/TabsDict";
+import { Nand2Infinity, tabsDict } from "./utils/TabsDict";
 import Tab from "./components/UI/Tab";
 import { MousePositionProvider } from "./utils/MousePositionContext";
 import GateStyleProvider from "./utils/StyleContext";
@@ -45,7 +45,7 @@ function App() {
       <MenuContext.Provider value={menuRef}>
         <JemContextProvider
           contextKey="tab"
-          defaultValue={Object.keys(tabsDict)[4]}
+          defaultValue={Object.keys(Nand2Infinity)[1]}
         >
           <MousePositionProvider>
             <GateStyleProvider>
