@@ -544,7 +544,7 @@ export const multibitNot: JsonGateDict = {
 const aIns: JsonGateDict[] = [];
 const bIns: JsonGateDict[] = [];
 const andNodes: [string, string][] = [];
-for (let i = 0; i < 4; i++) {
+for (let i = 0; i < 16; i++) {
   const aName = `a${i}`;
   const bName = `b${i}`;
   aIns.push({
@@ -559,7 +559,7 @@ for (let i = 0; i < 4; i++) {
     [bName]: {
       elementName: "node",
       elementProps: {
-        position: [2 * i + 2, 60],
+        position: [2 * i + 2, 39],
       },
     },
   });
@@ -567,7 +567,7 @@ for (let i = 0; i < 4; i++) {
   andNodes.push(["bottom", "b" + i]);
 }
 
-for (let i = 0; i < 4; i++) {
+for (let i = 0; i < 16; i++) {
   andNodes.push(["right", "out"]);
 }
 
@@ -582,12 +582,12 @@ export const multiBitAnd = {
       position: [1, 4],
       func: (inputs: boolean[]): boolean[] => {
         const outs: boolean[] = [];
-        for (let i = 0; i < 8; i += 2) {
+        for (let i = 0; i < 32; i += 2) {
           outs.push(inputs[i] && inputs[i + 1]);
         }
         return outs;
       },
-      label: "and",
+      label: "MULTI-BIT AND",
     },
   },
 };
