@@ -2,6 +2,7 @@ import { GridPage } from "../Pages/GridTest";
 import NodesAndVectors from "../Pages/NodesAndVectors";
 import Parser from "../Pages/Parser";
 import Propogation from "../Pages/Propogation";
+import { multibitNot } from "../circuits";
 import NAND2GATES from "../components/NAND/NANDPage";
 import Json2Gates from "../components/Parser/Json2Gates";
 import Json2Grid from "../components/Parser/Json2Grid";
@@ -24,5 +25,5 @@ export const tabsDict: TabsDict = {
 
 export const Nand2Infinity: TabsDict = {
   "Two bit gates": <NAND2GATES />,
-  "Multi bit Not": <MultiBitNot />,
+  "Multi bit Not": <Json2Grid dict={multibitNot} />,
 };

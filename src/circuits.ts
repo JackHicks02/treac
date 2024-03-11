@@ -3,10 +3,19 @@ import { xy } from "./components/Parser/Json2Grid"
 import { JsonGateDict } from "./types/types"
 
 export const multibitNot: JsonGateDict = {
-  a : {
+  testIn: {
     elementName: "node",
-    elementProps: {
-      position: [1,1]
-    }
-  }
+    elementProps: { position: [2,0] },
+  },
+  testIn2: {
+    elementName: "node",
+    elementProps: { position: [8,0] },
+    connect: "testIn"
+  },
+  testIn3: {
+    elementName: "node",
+    elementProps: { position: [15,0] },
+    connect: "testIn2"
+  },
+  
 }

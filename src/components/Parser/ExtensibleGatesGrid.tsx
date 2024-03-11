@@ -258,8 +258,7 @@ export const NGate: FC<NGate> = ({
         }
         return 0;
       }
-      console.log(dimensions.current[side] + 2);
-      console.log(rawDims.current.height);
+
       if (dimensions.current[side] + 2 < rawDims.current.width) {
         return Math.floor(
           (rawDims.current.width - dimensions.current[side]) / 2

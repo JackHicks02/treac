@@ -101,7 +101,9 @@ const Json2Elements = (
       case "node":
         positionObj[_key] = entry.elementProps.position;
 
-        let CLine = !entry.connect ? new BitLine() : bitLineObj[entry.connect]!;
+        let CLine = !entry.connect
+          ? new BitLine()
+          : bitLineObj[entry.connect] ?? findConnection(entry.connect, _key);
 
         if (!entry.connect) {
           bitLineObj[_key] = CLine;
@@ -179,16 +181,26 @@ const Json2Elements = (
 
         let outCount = 0;
         nodes.forEach((node) => {
-          if (node[1] === "out") {
-            bitLineObj[_key + node[0] + outCount] = new BitLine();
-            outsWithLine.push([...node, bitLineObj[_key + node[0] + outCount]]);
-            outCount++;
-          } else {
+          if (node[1] !== "out") {
             insWithLine.push([...node, findConnection(node[1], _key)!]);
           }
         });
-
-        outsWithLine.forEach((node) => (bitLineObj[node[0]] = new BitLine()));
+        const defaults = func(insWithLine.map((inLine) => inLine[2].getBit()));
+        console.log(
+          "inbits: ",
+          insWithLine.map((inLine) => inLine[2].getBit())
+        );
+        console.log(func);
+        console.log("defaults: ", defaults);
+        nodes.forEach((node) => {
+          if (node[1] === "out") {
+            bitLineObj[_key + node[0] + outCount] = new BitLine(
+              defaults[outCount]
+            );
+            outsWithLine.push([...node, bitLineObj[_key + node[0] + outCount]]);
+            outCount++;
+          }
+        });
 
         ElementArray.unshift(
           <NGate
@@ -261,7 +273,7 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
     width: width ?? 200,
     height: height ?? 100,
   });
-  const [testDict, setTestDict] = useState<JsonGateDict>({});
+  const [testDict, setDict] = useState<JsonGateDict>({});
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -275,7 +287,7 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
   useEffect(() => {
     xOffset.current = (menuRef?.current?.clientWidth ?? 0) + 16;
 
-    const _grid = [];
+    const _grid: GridItem[][] = [];
     for (let i = 0; i < gridSize.width; i++) {
       const row = [];
       for (let j = 0; j < gridSize.height; j++) {
@@ -285,7 +297,20 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
     }
     setGrid(_grid);
 
-    setTestDict(
+    const positions = Object.keys(dict ?? {});
+    dict &&
+      positions.forEach((_key) => {
+        if (dict[_key].elementProps.hasOwnProperty("position")) {
+          dict[_key].elementProps.position = xy(
+            dict[_key].elementProps.position[0],
+            dict[_key].elementProps.position[1],
+            _grid
+          );
+        }
+      });
+    console.log(positions);
+
+    setDict(
       dict ?? {
         testIn: {
           elementName: "node",
