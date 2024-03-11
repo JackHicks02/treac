@@ -45,7 +45,7 @@ function App() {
       <MenuContext.Provider value={menuRef}>
         <JemContextProvider
           contextKey="tab"
-          defaultValue={Object.keys(Nand2Infinity)[1]}
+          defaultValue={Object.keys(tabsDict)[4]}
         >
           <MousePositionProvider>
             <GateStyleProvider>

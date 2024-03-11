@@ -1,6 +1,6 @@
-import Json2Gates from "./components/Parser/Json2Gates"
-import { xy } from "./components/Parser/Json2Grid"
-import { JsonGateDict } from "./types/types"
+import Json2Gates from "./components/Parser/Json2Gates";
+import { xy } from "./components/Parser/Json2Grid";
+import { GateEntry, JsonGateDict } from "./types/types";
 
 export const multibitNot: JsonGateDict = {
   in1: {
@@ -539,5 +539,55 @@ export const multibitNot: JsonGateDict = {
       label: "not",
     },
   },
+};
+
+const aIns: JsonGateDict[] = [];
+const bIns: JsonGateDict[] = [];
+const andNodes: [string, string][] = [];
+for (let i = 0; i < 4; i++) {
+  const aName = `a${i}`;
+  const bName = `b${i}`;
+  aIns.push({
+    [aName]: {
+      elementName: "node",
+      elementProps: {
+        position: [2 * i + 2, 1],
+      },
+    },
+  });
+  bIns.push({
+    [bName]: {
+      elementName: "node",
+      elementProps: {
+        position: [2 * i + 2, 60],
+      },
+    },
+  });
+  andNodes.push(["top", "a" + i]);
+  andNodes.push(["bottom", "b" + i]);
 }
-  
+
+for (let i = 0; i < 4; i++) {
+  andNodes.push(["right", "out"]);
+}
+
+export const multiBitAnd = {
+  ...Object.assign({}, ...aIns),
+  ...Object.assign({}, ...bIns),
+
+  multiBitAnd: {
+    elementName: "custom",
+    elementProps: {
+      nodes: andNodes,
+      position: [1, 4],
+      func: (inputs: boolean[]): boolean[] => {
+        const outs: boolean[] = [];
+        for (let i = 0; i < 8; i += 2) {
+          outs.push(inputs[i] && inputs[i + 1]);
+        }
+        return outs;
+      },
+      label: "and",
+    },
+  },
+};

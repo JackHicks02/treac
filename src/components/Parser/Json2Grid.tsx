@@ -187,12 +187,7 @@ const Json2Elements = (
           }
         });
         const defaults = func(insWithLine.map((inLine) => inLine[2].getBit()));
-        console.log(
-          "inbits: ",
-          insWithLine.map((inLine) => inLine[2].getBit())
-        );
-        console.log(func);
-        console.log("defaults: ", defaults);
+
         nodes.forEach((node) => {
           if (node[1] === "out") {
             bitLineObj[_key + node[0] + outCount] = new BitLine(
@@ -309,7 +304,7 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
           );
         }
       });
-    console.log(positions);
+    console.log(localDict.current);
 
     setDict(
       (Object.keys(localDict.current).length > 0 && localDict.current) || {

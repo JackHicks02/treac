@@ -201,14 +201,18 @@ export const NGate: FC<NGate> = ({
   useNLineMount(combinedInAndOut, c);
 
   useMemo(() => {
-    ins.forEach(
-      (inLine) =>
-        (dimensions.current[inLine[0]] = dimensions.current[inLine[0]] + 1)
-    );
-    outs.forEach(
-      (outLine) =>
-        (dimensions.current[outLine[0]] = dimensions.current[outLine[0]] + 1)
-    );
+    ins.forEach((inLine) => {
+      console.log(inLine[0]);
+      console.log(dimensions.current[inLine[0]] + 1);
+      return (dimensions.current[inLine[0]] =
+        dimensions.current[inLine[0]] + 2);
+    });
+    outs.forEach((outLine) => {
+      console.log(outLine[0]);
+      console.log(dimensions.current[outLine[0]] + 1);
+      return (dimensions.current[outLine[0]] =
+        dimensions.current[outLine[0]] + 2);
+    });
   }, []);
 
   useMemo(() => {
@@ -232,7 +236,7 @@ export const NGate: FC<NGate> = ({
         return 4 * GridItem.gap;
       }
 
-      return rawBreadth * 2 * GridItem.gap;
+      return rawBreadth * GridItem.gap;
     },
     []
   );
@@ -251,7 +255,7 @@ export const NGate: FC<NGate> = ({
 
     const getGeneralOffset = (side: Side) => {
       if (side === "left" || side === "right") {
-        if (dimensions.current[side] + 2 < rawDims.current.height) {
+        if (dimensions.current[side] + 1 < rawDims.current.height) {
           return Math.floor(
             (rawDims.current.height - dimensions.current[side]) / 2
           );
@@ -259,7 +263,7 @@ export const NGate: FC<NGate> = ({
         return 0;
       }
 
-      if (dimensions.current[side] + 2 < rawDims.current.width) {
+      if (dimensions.current[side] + 1 < rawDims.current.width) {
         return Math.floor(
           (rawDims.current.width - dimensions.current[side]) / 2
         );
@@ -285,6 +289,7 @@ export const NGate: FC<NGate> = ({
             <BitNode
               positionObj={positionObj}
               keyID={`${keyID}left${leftIndex}`}
+              key={`${keyID}left${leftIndex}`}
               position={grid[x][y]}
               CLine={inLine[2]}
             /> //This not being dry => an unescessary re render?
@@ -292,13 +297,14 @@ export const NGate: FC<NGate> = ({
           leftIndex++;
           break;
         case "right":
-          x += rawDims.current.width + rightOffset;
-          y += 2 * rightIndex + 1;
+          x += rawDims.current.width;
+          y += rightIndex + topOffset;
           positionObj[`${keyID}right${rightIndex}`] = grid[x][y];
           DryNodes.current.push(
             <BitNode
               positionObj={positionObj}
               keyID={`${keyID}right${rightIndex}`}
+              key={`${keyID}right${rightIndex}`}
               position={grid[x][y]}
               CLine={inLine[2]}
             />
@@ -312,6 +318,7 @@ export const NGate: FC<NGate> = ({
             <BitNode
               positionObj={positionObj}
               keyID={`${keyID}top${topIndex}`}
+              key={`${keyID}top${topIndex}`}
               position={grid[x][y]}
               CLine={inLine[2]}
             />
@@ -321,12 +328,12 @@ export const NGate: FC<NGate> = ({
         case "bottom":
           x += 2 * bottomIndex + 1 + bottomOffset;
           y += rawDims.current.height;
-          positionObj[`${keyID}bottom${bottomIndex}`] =
-            grid[x][height / GridItem.gap];
+          positionObj[`${keyID}bottom${bottomIndex}`] = grid[x][y];
           DryNodes.current.push(
             <BitNode
               positionObj={positionObj}
               keyID={`${keyID}bottom${bottomIndex}`}
+              key={`${keyID}bottom${bottomIndex}`}
               position={grid[x][y]}
               CLine={inLine[2]}
             />
@@ -347,6 +354,7 @@ export const NGate: FC<NGate> = ({
             <BitNode
               positionObj={positionObj}
               keyID={`${keyID}left${leftIndex}`}
+              key={`${keyID}left${leftIndex}`}
               position={grid[x][y]}
               CLine={outLine[2]}
             />
@@ -361,6 +369,7 @@ export const NGate: FC<NGate> = ({
             <BitNode
               positionObj={positionObj}
               keyID={`${keyID}right${rightIndex}`}
+              key={`${keyID}right${leftIndex}`}
               position={grid[x][y]}
               CLine={outLine[2]}
             />
@@ -374,6 +383,7 @@ export const NGate: FC<NGate> = ({
             <BitNode
               positionObj={positionObj}
               keyID={`${keyID}top${topIndex}`}
+              key={`${keyID}top${leftIndex}`}
               position={grid[x][y]}
               CLine={outLine[2]}
             />
@@ -388,6 +398,7 @@ export const NGate: FC<NGate> = ({
             <BitNode
               positionObj={positionObj}
               keyID={`${keyID}bottom${bottomIndex}`}
+              key={`${keyID}bottom${leftIndex}`}
               position={grid[x][y]}
               CLine={outLine[2]}
             />
