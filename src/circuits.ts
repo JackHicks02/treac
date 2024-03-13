@@ -1,6 +1,6 @@
 import Json2Gates from "./components/Parser/Json2Gates";
 import { xy } from "./components/Parser/Json2Grid";
-import { GateEntry, JsonGateDict } from "./types/types";
+import { Dictionary, GateEntry, JsonGateDict } from "./types/types";
 
 export const multibitNot: JsonGateDict = {
   in1: {
@@ -571,7 +571,66 @@ for (let i = 0; i < 16; i++) {
   andNodes.push(["right", "out"]);
 }
 
-export const multiBitAnd = {
+export const multiBitAnd: JsonGateDict = {
+  declare: {
+    //name must be first parameter
+    nodeLine: ({ name, x, y, amount }: Dictionary<any>) => {
+      const nodes: Dictionary<GateEntry> = {};
+      console.log(name, x, y, amount);
+      for (let i = 0; i < amount; i++) {
+        nodes[i] = {
+          elementName: "node",
+          elementProps: {
+            position: [x + 2 * i, y],
+          },
+        };
+        console.log(nodes);
+      }
+      return nodes;
+    },
+    multiBitAnd: ({ name, position, nodes, bit }: Dictionary<any>) => {
+      return {
+        [name]: {
+          elementName: "custom",
+          elementProps: {
+            nodes: nodes,
+            position: position,
+            func: (inputs: boolean[]): boolean[] => {
+              const outs: boolean[] = [];
+              for (let i = 0; i < bit * 2; i += 2) {
+                outs.push(inputs[i] && inputs[i + 1]);
+              }
+              return outs;
+            },
+            label: "MULTI-BIT AND",
+          },
+        },
+      };
+    },
+  },
+
+  nodeTestIns: JSON.stringify({ name: "nodeLine", x: 40, y: 40, amount: 4 }),
+  nodeTestInsBot: JSON.stringify({ name: "nodeLine", x: 40, y: 60, amount: 4 }),
+  and: JSON.stringify({
+    name: "multiBitAnd",
+    position: [39, 46],
+    nodes: [
+      ["top", "0nodeTestIns"],
+      ["bottom", "0nodeTestInsBot"],
+      ["top", "1nodeTestIns"],
+      ["bottom", "1nodeTestInsBot"],
+      ["top", "2nodeTestIns"],
+      ["bottom", "2nodeTestInsBot"],
+      ["top", "3nodeTestIns"],
+      ["bottom", "3nodeTestInsBot"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+    bit: 4,
+  }),
+
   ...Object.assign({}, ...aIns),
   ...Object.assign({}, ...bIns),
 
@@ -589,5 +648,26 @@ export const multiBitAnd = {
       },
       label: "MULTI-BIT AND",
     },
+  },
+
+  t1: {
+    elementName: "node",
+    elementProps: {
+      position: [60, 60],
+    },
+  },
+  t2: {
+    elementName: "node",
+    elementProps: {
+      position: [70, 60],
+    },
+    connect: "t1",
+  },
+  t3: {
+    elementName: "node",
+    elementProps: {
+      position: [65, 70],
+    },
+    connect: "t2",
   },
 };

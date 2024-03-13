@@ -23,6 +23,7 @@ import {
   unFunc,
   nFunc,
   Side,
+  GateEntry,
 } from "../../types/types";
 import _ from "lodash";
 
@@ -79,13 +80,15 @@ const Json2Elements = (
   const ElementArray: ElementArray = [];
 
   const findConnection = (key: string, currentNode: string): BitLine | null => {
+    const entry = JSON[key] as GateEntry;
+
     if (bitLineObj[key]) {
       return bitLineObj[key];
     }
 
     try {
       if (JSON[key].connect) {
-        return findConnection(JSON[key].connect!, currentNode);
+        return findConnection(entry.connect!, currentNode);
       } else {
         return null;
       }
@@ -96,9 +99,11 @@ const Json2Elements = (
   };
 
   Object.keys(JSON).forEach((_key) => {
-    const entry = JSON[_key];
+    const entry = JSON[_key] as GateEntry;
 
     switch (entry.elementName) {
+      case "declare":
+        return;
       case "node":
         positionObj[_key] = entry.elementProps.position;
 
@@ -232,23 +237,11 @@ const Json2Elements = (
           );
           dimensions[inLine[0]] = dimensions[inLine[0]] + 1;
         });
-
-        // outsWithLine.forEach((outLine) => {
-        //   ElementArray.push(
-        //     <SquareVectorFromObj
-        //       key={_key + outLine[0] + dimensions[outLine[0]] + "vec"}
-        //       positionObj={positionObj}
-        //       originKey={outLine[1]}
-        //       destinationKey={_key + outLine[0] + dimensions[outLine[0]]}
-        //       bitLine={findConnection(outLine[1], _key)!}
-        //     />
-        //   );
-        //   dimensions[outLine[0]] = dimensions[outLine[0]] + 1;
-        // });
         break;
 
       default:
-        throw new Error(`No component by the name of ${entry.elementName}`);
+        //throw new Error(`No component by the name of ${entry.elementName}`);
+        break;
     }
   });
   return ElementArray;
@@ -265,6 +258,7 @@ export const xy = (x: number, y: number, _grid: GridItem[][]): GridItem =>
 
 const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
   const localDict = useRef<JsonGateDict>(_.cloneDeep(dict ?? {}));
+
   const [grid, setGrid] = useState<GridItem[][]>([]);
   const [gridSize, _setGridSize] = useState({
     width: width ?? 200,
@@ -292,18 +286,57 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
     }
     setGrid(_grid);
 
-    const positions = Object.keys(dict ?? {});
+    const dictEntries = Object.keys(dict ?? {});
 
     Object.keys(localDict.current).length > 0 &&
-      positions.forEach((_key) => {
-        if (localDict.current[_key].elementProps.hasOwnProperty("position")) {
-          localDict.current[_key].elementProps.position = xy(
-            localDict.current[_key].elementProps.position[0],
-            localDict.current[_key].elementProps.position[1],
+      dictEntries.forEach((_key) => {
+        let entry = localDict.current[_key];
+        if (typeof entry === "string") {
+          const value = JSON.parse(entry);
+          console.log(value);
+
+          const funcName = value["name"];
+
+          delete localDict.current[_key];
+
+          console.log(funcName);
+
+          if (!localDict.current.declare.hasOwnProperty(funcName)) {
+            throw new Error(`Missing declaration: ${_key}`);
+          }
+
+          console.log(_key);
+          console.log("function: ", localDict.current.declare[funcName]);
+          console.log(typeof localDict.current.declare[funcName]);
+
+          const funcResult = localDict.current.declare[funcName](value);
+
+          console.log(funcResult);
+          Object.keys(funcResult).forEach(
+            (__key) => (localDict.current[__key + _key] = funcResult[__key])
+          );
+        }
+      });
+    delete localDict.current["declare"];
+
+    console.log(localDict.current);
+
+    Object.keys(localDict.current).length > 0 &&
+      Object.keys(localDict.current).forEach((_key) => {
+        console.log(_key);
+        let entry = localDict.current[_key] as GateEntry;
+        if (
+          entry.hasOwnProperty("elementProps") &&
+          entry.elementProps.hasOwnProperty("position")
+        ) {
+          entry.elementProps.position = xy(
+            entry.elementProps.position[0] as number,
+            entry.elementProps.position[1] as number,
             _grid
           );
         }
       });
+
     console.log(localDict.current);
 
     setDict(

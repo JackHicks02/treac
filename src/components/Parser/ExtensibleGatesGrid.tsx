@@ -202,14 +202,10 @@ export const NGate: FC<NGate> = ({
 
   useMemo(() => {
     ins.forEach((inLine) => {
-      console.log(inLine[0]);
-      console.log(dimensions.current[inLine[0]] + 1);
       return (dimensions.current[inLine[0]] =
         dimensions.current[inLine[0]] + 2);
     });
     outs.forEach((outLine) => {
-      console.log(outLine[0]);
-      console.log(dimensions.current[outLine[0]] + 1);
       return (dimensions.current[outLine[0]] =
         dimensions.current[outLine[0]] + 2);
     });
