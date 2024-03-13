@@ -607,22 +607,41 @@ export const multiBitAnd: JsonGateDict = {
         },
       };
     },
+    multiBitOr: ({ name, position, nodes, bit }: Dictionary<any>) => {
+      return {
+        [name]: {
+          elementName: "custom",
+          elementProps: {
+            nodes: nodes,
+            position: position,
+            func: (inputs: boolean[]): boolean[] => {
+              const outs: boolean[] = [];
+              for (let i = 0; i < bit * 2; i += 2) {
+                outs.push(inputs[i] || inputs[i + 1]);
+              }
+              return outs;
+            },
+            label: "MULTI-BIT OR",
+          },
+        },
+      };
+    },
   },
 
   nodeTestIns: JSON.stringify({ name: "nodeLine", x: 40, y: 40, amount: 4 }),
   nodeTestInsBot: JSON.stringify({ name: "nodeLine", x: 40, y: 60, amount: 4 }),
   and: JSON.stringify({
-    name: "multiBitAnd",
+    name: "multiBitOr",
     position: [39, 46],
     nodes: [
-      ["top", "0nodeTestIns"],
-      ["bottom", "0nodeTestInsBot"],
-      ["top", "1nodeTestIns"],
-      ["bottom", "1nodeTestInsBot"],
-      ["top", "2nodeTestIns"],
-      ["bottom", "2nodeTestInsBot"],
-      ["top", "3nodeTestIns"],
-      ["bottom", "3nodeTestInsBot"],
+      ["top", "nodeTestIns0"],
+      ["bottom", "nodeTestInsBot0"],
+      ["top", "nodeTestIns1"],
+      ["bottom", "nodeTestInsBot1"],
+      ["top", "nodeTestIns2"],
+      ["bottom", "nodeTestInsBot2"],
+      ["top", "nodeTestIns3"],
+      ["bottom", "nodeTestInsBot3"],
       ["right", "out"],
       ["right", "out"],
       ["right", "out"],

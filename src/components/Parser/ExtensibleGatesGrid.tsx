@@ -300,7 +300,7 @@ export const NGate: FC<NGate> = ({
             <BitNode
               positionObj={positionObj}
               keyID={`${keyID}right${rightIndex}`}
-              key={`${keyID}right${rightIndex}`}
+              key={`${keyID}right${rightIndex}1`}
               position={grid[x][y]}
               CLine={inLine[2]}
             />
@@ -329,7 +329,7 @@ export const NGate: FC<NGate> = ({
             <BitNode
               positionObj={positionObj}
               keyID={`${keyID}bottom${bottomIndex}`}
-              key={`${keyID}bottom${bottomIndex}`}
+              key={`${keyID}bottom${bottomIndex}1`}
               position={grid[x][y]}
               CLine={inLine[2]}
             />

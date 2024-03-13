@@ -313,7 +313,7 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
 
           console.log(funcResult);
           Object.keys(funcResult).forEach(
-            (__key) => (localDict.current[__key + _key] = funcResult[__key])
+            (__key) => (localDict.current[_key + __key] = funcResult[__key])
           );
         }
       });
