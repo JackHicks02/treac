@@ -71,6 +71,195 @@ export class GridItem {
   };
 }
 
+const mapDictToElems = (
+  JSON: JsonGateDict,
+  _key: string,
+  positionObj: Dictionary<GridItem>,
+  findConnection: (key: string, currentNode: string) => BitLine | null,
+  bitLineObj: Dictionary<BitLine>,
+  ElementArray: ElementArray,
+  grid: GridItem[][],
+  awaitingKeys: Dictionary<string>
+): void | (() => void) => {
+  const entry = JSON[_key] as GateEntry;
+  console.log(_key);
+
+  if (
+    entry.elementProps.hasOwnProperty("await") &&
+    !positionObj.hasOwnProperty(entry.elementProps.await)
+  ) {
+    console.log(_key, "is awaiting ", entry.elementProps.await);
+    awaitingKeys[entry.elementProps.await] = _key;
+    console.log(awaitingKeys);
+    return;
+  }
+
+  console.log(awaitingKeys);
+
+  switch (entry.elementName) {
+    case "declare":
+      return;
+    case "node":
+      positionObj[_key] = entry.elementProps.position;
+
+      let CLine = !entry.connect
+        ? new BitLine()
+        : bitLineObj[entry.connect] ?? findConnection(entry.connect, _key);
+
+      if (!entry.connect) {
+        bitLineObj[_key] = CLine;
+      } else {
+        ElementArray.push(
+          <SquareVectorFromObj
+            key={""}
+            positionObj={positionObj}
+            bitLine={CLine}
+            originKey={entry.connect}
+            destinationKey={_key}
+          />
+        );
+      }
+      ElementArray.unshift(
+        <BitNode
+          positionObj={positionObj}
+          key={_key}
+          keyID={_key}
+          CLine={CLine}
+          position={entry.elementProps.position}
+          {...entry.elementProps}
+        />
+      );
+      break;
+    case "nand":
+      bitLineObj[_key] = new BitLine(
+        !(
+          findConnection(entry.elementProps.A, _key)!.getBit() &&
+          findConnection(entry.elementProps.B, _key)!.getBit()
+        )
+      );
+
+      ElementArray.unshift(
+        <NAND
+          key={_key}
+          keyID={_key}
+          CLine={bitLineObj[_key]}
+          ALine={findConnection(entry.elementProps.A, _key)!}
+          BLine={findConnection(entry.elementProps.B, _key)!}
+          positionObj={positionObj}
+          position={entry.elementProps.position}
+          grid={grid}
+        />
+      );
+
+      ElementArray.push(
+        <SquareVectorFromObj
+          key={_key + "A"}
+          positionObj={positionObj}
+          originKey={entry.elementProps.A}
+          destinationKey={_key + "A"}
+          bitLine={findConnection(entry.elementProps.A, _key)!}
+        />
+      );
+      ElementArray.push(
+        <SquareVectorFromObj
+          key={_key + "B"}
+          positionObj={positionObj}
+          originKey={entry.elementProps.B}
+          destinationKey={_key + "B"}
+          bitLine={findConnection(entry.elementProps.B, _key)!}
+        />
+      );
+      break;
+
+    case "custom":
+      const nodes = entry.elementProps.nodes as [Side, string][];
+      const label = entry.elementProps.label as string;
+      const func = entry.elementProps.func as nFunc;
+      const position = entry.elementProps.position as GridItem;
+
+      const insWithLine: [Side, string, BitLine][] = []; // the non line ones dont need to be passed or the outs don't need to have lines
+      const outsWithLine: [Side, string, BitLine][] = [];
+
+      let outCount = 0;
+      nodes.forEach((node) => {
+        if (node[1] !== "out") {
+          insWithLine.push([...node, findConnection(node[1], _key)!]);
+        }
+      });
+      const defaults = func(insWithLine.map((inLine) => inLine[2].getBit()));
+
+      nodes.forEach((node) => {
+        if (node[1] === "out") {
+          bitLineObj[_key + node[0] + outCount] = new BitLine(
+            defaults[outCount]
+          );
+          outsWithLine.push([...node, bitLineObj[_key + node[0] + outCount]]);
+          outCount++;
+        }
+      });
+
+      ElementArray.unshift(
+        <NGate
+          label={label}
+          keyID={_key}
+          ins={insWithLine}
+          outs={outsWithLine}
+          positionObj={positionObj}
+          position={position}
+          grid={grid}
+          func={func}
+        />
+      );
+
+      //pass this in later to reduce some of the fat horrible mess
+      const dimensions = {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      };
+
+      insWithLine.forEach((inLine) => {
+        //  positionObj[`${keyID}Left${leftIndex}`] = grid[x][y];
+        ElementArray.push(
+          <SquareVectorFromObj
+            key={_key + inLine[0] + dimensions[inLine[0]] + "vec"}
+            positionObj={positionObj}
+            originKey={inLine[1]}
+            destinationKey={_key + inLine[0] + dimensions[inLine[0]]}
+            bitLine={findConnection(inLine[1], _key)!}
+          />
+        );
+        dimensions[inLine[0]] = dimensions[inLine[0]] + 1;
+      });
+      break;
+
+    default:
+      //throw new Error(`No component by the name of ${entry.elementName}`);
+      break;
+  }
+
+  if (awaitingKeys.hasOwnProperty(_key)) {
+    console.log(_key, " found for ", awaitingKeys[_key]);
+
+    console.log(awaitingKeys);
+    console.log(_key);
+
+    delete awaitingKeys[awaitingKeys[_key]];
+
+    mapDictToElems(
+      JSON,
+      awaitingKeys[_key],
+      positionObj,
+      findConnection,
+      bitLineObj,
+      ElementArray,
+      grid,
+      awaitingKeys
+    );
+  }
+};
+
 const Json2Elements = (
   JSON: JsonGateDict,
   bitLineObj: Dictionary<BitLine>,
@@ -98,151 +287,20 @@ const Json2Elements = (
     }
   };
 
+  const awaitingKeys: Dictionary<string> = {};
   Object.keys(JSON).forEach((_key) => {
-    const entry = JSON[_key] as GateEntry;
+    const entry = JSON[_key];
 
-    switch (entry.elementName) {
-      case "declare":
-        return;
-      case "node":
-        positionObj[_key] = entry.elementProps.position;
-
-        let CLine = !entry.connect
-          ? new BitLine()
-          : bitLineObj[entry.connect] ?? findConnection(entry.connect, _key);
-
-        if (!entry.connect) {
-          bitLineObj[_key] = CLine;
-        } else {
-          ElementArray.push(
-            <SquareVectorFromObj
-              key={""}
-              positionObj={positionObj}
-              bitLine={CLine}
-              originKey={entry.connect}
-              destinationKey={_key}
-            />
-          );
-        }
-        ElementArray.unshift(
-          <BitNode
-            positionObj={positionObj}
-            key={_key}
-            keyID={_key}
-            CLine={CLine}
-            position={entry.elementProps.position}
-            {...entry.elementProps}
-          />
-        );
-        break;
-      case "nand":
-        bitLineObj[_key] = new BitLine(
-          !(
-            findConnection(entry.elementProps.A, _key)!.getBit() &&
-            findConnection(entry.elementProps.B, _key)!.getBit()
-          )
-        );
-
-        ElementArray.unshift(
-          <NAND
-            key={_key}
-            keyID={_key}
-            CLine={bitLineObj[_key]}
-            ALine={findConnection(entry.elementProps.A, _key)!}
-            BLine={findConnection(entry.elementProps.B, _key)!}
-            positionObj={positionObj}
-            position={entry.elementProps.position}
-            grid={grid}
-          />
-        );
-
-        ElementArray.push(
-          <SquareVectorFromObj
-            key={_key + "A"}
-            positionObj={positionObj}
-            originKey={entry.elementProps.A}
-            destinationKey={_key + "A"}
-            bitLine={findConnection(entry.elementProps.A, _key)!}
-          />
-        );
-        ElementArray.push(
-          <SquareVectorFromObj
-            key={_key + "B"}
-            positionObj={positionObj}
-            originKey={entry.elementProps.B}
-            destinationKey={_key + "B"}
-            bitLine={findConnection(entry.elementProps.B, _key)!}
-          />
-        );
-        break;
-
-      case "custom":
-        const nodes = entry.elementProps.nodes as [Side, string][];
-        const label = entry.elementProps.label as string;
-        const func = entry.elementProps.func as nFunc;
-        const position = entry.elementProps.position as GridItem;
-
-        const insWithLine: [Side, string, BitLine][] = []; // the non line ones dont need to be passed or the outs don't need to have lines
-        const outsWithLine: [Side, string, BitLine][] = [];
-
-        let outCount = 0;
-        nodes.forEach((node) => {
-          if (node[1] !== "out") {
-            insWithLine.push([...node, findConnection(node[1], _key)!]);
-          }
-        });
-        const defaults = func(insWithLine.map((inLine) => inLine[2].getBit()));
-
-        nodes.forEach((node) => {
-          if (node[1] === "out") {
-            bitLineObj[_key + node[0] + outCount] = new BitLine(
-              defaults[outCount]
-            );
-            outsWithLine.push([...node, bitLineObj[_key + node[0] + outCount]]);
-            outCount++;
-          }
-        });
-
-        ElementArray.unshift(
-          <NGate
-            label={label}
-            keyID={_key}
-            ins={insWithLine}
-            outs={outsWithLine}
-            positionObj={positionObj}
-            position={position}
-            grid={grid}
-            func={func}
-          />
-        );
-
-        //pass this in later to reduce some of the fat horrible mess
-        const dimensions = {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        };
-
-        insWithLine.forEach((inLine) => {
-          //  positionObj[`${keyID}Left${leftIndex}`] = grid[x][y];
-          ElementArray.push(
-            <SquareVectorFromObj
-              key={_key + inLine[0] + dimensions[inLine[0]] + "vec"}
-              positionObj={positionObj}
-              originKey={inLine[1]}
-              destinationKey={_key + inLine[0] + dimensions[inLine[0]]}
-              bitLine={findConnection(inLine[1], _key)!}
-            />
-          );
-          dimensions[inLine[0]] = dimensions[inLine[0]] + 1;
-        });
-        break;
-
-      default:
-        //throw new Error(`No component by the name of ${entry.elementName}`);
-        break;
-    }
+    mapDictToElems(
+      JSON,
+      _key,
+      positionObj,
+      findConnection,
+      bitLineObj,
+      ElementArray,
+      grid,
+      awaitingKeys
+    );
   });
   return ElementArray;
 };
@@ -299,19 +357,12 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
 
           delete localDict.current[_key];
 
-          console.log(funcName);
-
           if (!localDict.current.declare.hasOwnProperty(funcName)) {
             throw new Error(`Missing declaration: ${_key}`);
           }
 
-          console.log(_key);
-          console.log("function: ", localDict.current.declare[funcName]);
-          console.log(typeof localDict.current.declare[funcName]);
-
           const funcResult = localDict.current.declare[funcName](value);
 
-          console.log(funcResult);
           Object.keys(funcResult).forEach(
             (__key) => (localDict.current[_key + __key] = funcResult[__key])
           );
@@ -319,11 +370,8 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
       });
     delete localDict.current["declare"];
 
-    console.log(localDict.current);
-
     Object.keys(localDict.current).length > 0 &&
       Object.keys(localDict.current).forEach((_key) => {
-        console.log(_key);
         let entry = localDict.current[_key] as GateEntry;
         if (
           entry.hasOwnProperty("elementProps") &&
@@ -336,8 +384,6 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
           );
         }
       });
-
-    console.log(localDict.current);
 
     setDict(
       (Object.keys(localDict.current).length > 0 && localDict.current) || {
