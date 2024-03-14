@@ -31,6 +31,9 @@ export class BitLine {
     }
 
     callSetters && this.callSetters();
+    // setTimeout(() => {
+    //   callSetters && this.callSetters();
+    // }, 1000);
   };
 
   getBit = (): boolean => {

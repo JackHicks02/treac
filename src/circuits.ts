@@ -16,6 +16,21 @@ const stdLib = {
     }
     return nodes;
   },
+  multiWayAnd: ({ name, position, nodes }: Dictionary<any>) => {
+    return {
+      [name]: {
+        elementName: "custom",
+        elementProps: {
+          nodes: nodes,
+          position: position,
+          func: (inputs: boolean[]): boolean[] => {
+            return [inputs.every((input) => input)];
+          },
+          label: "AND",
+        },
+      },
+    };
+  },
   multiBitAnd: ({ name, position, nodes, bit }: Dictionary<any>) => {
     return {
       [name]: {
@@ -50,6 +65,21 @@ const stdLib = {
             return outs;
           },
           label: "MULTI-BIT OR",
+        },
+      },
+    };
+  },
+  multiWayOr: ({ name, position, nodes }: Dictionary<any>) => {
+    return {
+      [name]: {
+        elementName: "custom",
+        elementProps: {
+          nodes: nodes,
+          position: position,
+          func: (inputs: boolean[]): boolean[] => {
+            return [inputs.some((input) => input)];
+          },
+          label: "OR",
         },
       },
     };
@@ -634,21 +664,6 @@ export const multiBitAnd: JsonGateDict = {
   nodeTestIns: JSON.stringify({ name: "nodeLine", x: 40, y: 40, amount: 4 }),
   nodeTestInsBot: JSON.stringify({ name: "nodeLine", x: 40, y: 60, amount: 4 }),
 
-  test: {
-    elementName: "node",
-    elementProps: {
-      position: [8, 8],
-      await: "test2",
-    },
-    connect: "test2",
-  },
-  test2: {
-    elementName: "node",
-    elementProps: {
-      position: [4, 4],
-    },
-  },
-
   or: JSON.stringify({
     name: "multiBitOr",
     position: [39, 46],
@@ -667,6 +682,61 @@ export const multiBitAnd: JsonGateDict = {
       ["right", "out"],
     ],
     bit: 4,
+  }),
+
+  testMe2: {
+    elementName: "node",
+    elementProps: {
+      position: [20, 16],
+      await: "testMe",
+    },
+    connect: "testMe",
+  },
+
+  testMe: {
+    elementName: "node",
+    elementProps: {
+      position: [20, 18],
+      await: "multiWayAndLine0",
+    },
+    connect: "multiWayAndLine0",
+  },
+
+  multiWayAndLine: JSON.stringify({
+    name: "nodeLine",
+    x: 20,
+    y: 20,
+    amount: 4,
+  }),
+
+  multiWayAnd: JSON.stringify({
+    name: "multiWayAnd",
+    position: [19, 22],
+    nodes: [
+      ["top", "multiWayAndLine0"],
+      ["top", "multiWayAndLine1"],
+      ["top", "multiWayAndLine2"],
+      ["top", "multiWayAndLine3"],
+      ["bottom", "out"],
+    ],
+  }),
+
+  multiWayOrLine: JSON.stringify({
+    name: "nodeLine",
+    x: 30,
+    y: 20,
+    amount: 4,
+  }),
+  multiWayOr: JSON.stringify({
+    name: "multiWayOr",
+    position: [29, 22],
+    nodes: [
+      ["top", "multiWayOrLine0"],
+      ["top", "multiWayOrLine1"],
+      ["top", "multiWayOrLine2"],
+      ["top", "multiWayOrLine3"],
+      ["bottom", "out"],
+    ],
   }),
 
   ArOutTest: {
@@ -702,6 +772,21 @@ export const multiBitAnd: JsonGateDict = {
   //       return outs;
   //     },
   //     label: "MULTI-BIT AND",
+  //   },
+  // },
+
+  // test: {
+  //   elementName: "node",
+  //   elementProps: {
+  //     position: [8, 8],
+  //     await: "test2",
+  //   },
+  //   connect: "test2",
+  // },
+  // test2: {
+  //   elementName: "node",
+  //   elementProps: {
+  //     position: [4, 4],
   //   },
   // },
 };

@@ -364,6 +364,7 @@ export const NGate: FC<NGate> = ({
               key={`${keyID}left${leftIndex}`}
               position={grid[x][y]}
               CLine={outLine[2]}
+              forceRender={forceRender}
             />
           );
           leftIndex++;
@@ -396,6 +397,7 @@ export const NGate: FC<NGate> = ({
               key={`${keyID}top${leftIndex}`}
               position={grid[x][y]}
               CLine={outLine[2]}
+              forceRender={forceRender}
             />
           );
           topIndex++;
@@ -411,6 +413,7 @@ export const NGate: FC<NGate> = ({
               key={`${keyID}bottom${leftIndex}`}
               position={grid[x][y]}
               CLine={outLine[2]}
+              forceRender={forceRender}
             />
           );
           bottomIndex++;
