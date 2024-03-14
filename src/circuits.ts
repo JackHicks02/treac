@@ -3,7 +3,7 @@ import { xy } from "./components/Parser/Json2Grid";
 import { Dictionary, GateEntry, JsonGateDict } from "./types/types";
 
 const stdLib = {
-  nodeLine: ({ name, x, y, amount, pass = 0 }: Dictionary<any>) => {
+  nodeLine: ({ name, x, y, amount }: Dictionary<any>) => {
     const nodes: Dictionary<GateEntry> = {};
     console.log(name, x, y, amount);
     for (let i = 0; i < amount; i++) {
@@ -11,14 +11,12 @@ const stdLib = {
         elementName: "node",
         elementProps: {
           position: [x + 2 * i, y],
-          pass: pass,
         },
       };
-      console.log(nodes);
     }
     return nodes;
   },
-  multiBitAnd: ({ name, position, nodes, bit, pass = 0 }: Dictionary<any>) => {
+  multiBitAnd: ({ name, position, nodes, bit }: Dictionary<any>) => {
     return {
       [name]: {
         elementName: "custom",
@@ -33,12 +31,11 @@ const stdLib = {
             return outs;
           },
           label: "MULTI-BIT AND",
-          pass: pass,
         },
       },
     };
   },
-  multiBitOr: ({ name, position, nodes, bit, pass = 0 }: Dictionary<any>) => {
+  multiBitOr: ({ name, position, nodes, bit }: Dictionary<any>) => {
     return {
       [name]: {
         elementName: "custom",
@@ -53,7 +50,6 @@ const stdLib = {
             return outs;
           },
           label: "MULTI-BIT OR",
-          pass: pass,
         },
       },
     };
@@ -653,15 +649,6 @@ export const multiBitAnd: JsonGateDict = {
     },
   },
 
-  ArOutTest: {
-    elementName: "node",
-    elementProps: {
-      position: [56, 48],
-      await: "ormultiBitOrright0",
-    },
-    connect: "ormultiBitOrright0",
-  },
-
   or: JSON.stringify({
     name: "multiBitOr",
     position: [39, 46],
@@ -681,6 +668,23 @@ export const multiBitAnd: JsonGateDict = {
     ],
     bit: 4,
   }),
+
+  ArOutTest: {
+    elementName: "node",
+    elementProps: {
+      position: [50, 47],
+      await: "ormultiBitOrright0", // fix these shit names should be or0
+    },
+    connect: "ormultiBitOrright0",
+  },
+  tArOutTest: {
+    elementName: "node",
+    elementProps: {
+      position: [52, 47],
+      await: "ArOutTest",
+    },
+    connect: "ArOutTest",
+  },
 
   // ...Object.assign({}, ...aIns),
   // ...Object.assign({}, ...bIns),

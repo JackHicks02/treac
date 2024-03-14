@@ -1,5 +1,6 @@
 import {
   FC,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -26,6 +27,7 @@ import {
   GateEntry,
 } from "../../types/types";
 import _ from "lodash";
+import { useRender } from "../../utils/useRender";
 
 export class GridItem {
   public static readonly gap: number = 12;
@@ -79,10 +81,40 @@ const mapDictToElems = (
   bitLineObj: Dictionary<BitLine>,
   ElementArray: ElementArray,
   grid: GridItem[][],
-  awaitingKeys: Dictionary<string>
+  awaitingKeys: Dictionary<string>,
+  forceRender: () => void
 ): void | (() => void) => {
   const entry = JSON[_key] as GateEntry;
-  console.log(_key);
+  console.log("processing: ", _key);
+
+  const handleAwait = (awaitKey: string) => {
+    console.log("handle await: ", awaitKey);
+
+    if (awaitingKeys.hasOwnProperty(awaitKey)) {
+      console.log(awaitKey, " found for ", awaitingKeys[awaitKey]);
+
+      console.log(_.clone(ElementArray));
+
+      mapDictToElems(
+        JSON,
+        awaitingKeys[awaitKey],
+        positionObj,
+        findConnection,
+        bitLineObj,
+        ElementArray,
+        grid,
+        awaitingKeys,
+        forceRender
+      );
+      console.log(awaitingKeys);
+
+      console.log(_.clone(ElementArray));
+
+      delete awaitingKeys[awaitKey];
+
+      console.log(awaitingKeys);
+    }
+  };
 
   if (
     entry.elementProps.hasOwnProperty("await") &&
@@ -93,8 +125,6 @@ const mapDictToElems = (
     console.log(awaitingKeys);
     return;
   }
-
-  console.log(awaitingKeys);
 
   switch (entry.elementName) {
     case "declare":
@@ -208,6 +238,8 @@ const mapDictToElems = (
           position={position}
           grid={grid}
           func={func}
+          handleAwait={handleAwait}
+          forceRender={forceRender}
         />
       );
 
@@ -239,35 +271,17 @@ const mapDictToElems = (
       break;
   }
 
-  if (awaitingKeys.hasOwnProperty(_key)) {
-    console.log(_key, " found for ", awaitingKeys[_key]);
-
-    console.log(awaitingKeys);
-    console.log(_key);
-
-    delete awaitingKeys[awaitingKeys[_key]];
-
-    mapDictToElems(
-      JSON,
-      awaitingKeys[_key],
-      positionObj,
-      findConnection,
-      bitLineObj,
-      ElementArray,
-      grid,
-      awaitingKeys
-    );
-  }
+  handleAwait(_key);
 };
 
 const Json2Elements = (
   JSON: JsonGateDict,
   bitLineObj: Dictionary<BitLine>,
   positionObj: Dictionary<GridItem>,
-  grid: GridItem[][]
-): ElementArray => {
-  const ElementArray: ElementArray = [];
-
+  grid: GridItem[][],
+  ElementArray: ElementArray,
+  forceRender: () => void
+) => {
   const findConnection = (key: string, currentNode: string): BitLine | null => {
     const entry = JSON[key] as GateEntry;
 
@@ -289,8 +303,6 @@ const Json2Elements = (
 
   const awaitingKeys: Dictionary<string> = {};
   Object.keys(JSON).forEach((_key) => {
-    const entry = JSON[_key];
-
     mapDictToElems(
       JSON,
       _key,
@@ -299,10 +311,10 @@ const Json2Elements = (
       bitLineObj,
       ElementArray,
       grid,
-      awaitingKeys
+      awaitingKeys,
+      forceRender
     );
   });
-  return ElementArray;
 };
 
 interface Json2GatesProps {
@@ -314,7 +326,11 @@ interface Json2GatesProps {
 export const xy = (x: number, y: number, _grid: GridItem[][]): GridItem =>
   _grid[x][y];
 
+const bitLineObj: Dictionary<BitLine> = {};
+const positionObj: Dictionary<GridItem> = {};
+
 const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
+  const forceRender = useRender();
   const localDict = useRef<JsonGateDict>(_.cloneDeep(dict ?? {}));
 
   const [grid, setGrid] = useState<GridItem[][]>([]);
@@ -325,11 +341,10 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
   const [testDict, setDict] = useState<JsonGateDict>({});
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const elementArray = useRef<ElementArray>([]);
+
   const xOffset = useRef<number>(0);
   const menuRef = useMenuContext();
-
-  const bitLineObj: Dictionary<BitLine> = {};
-  const positionObj: Dictionary<GridItem> = {};
 
   useEffect(() => {
     xOffset.current = (menuRef?.current?.clientWidth ?? 0) + 16;
@@ -526,16 +541,24 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
   const svgWidth = gridSize.width * GridItem.gap;
   const svgHeight = gridSize.height * GridItem.gap;
 
-  const circuit = useMemo(
-    () => Json2Elements(testDict, bitLineObj, positionObj, grid),
+  useMemo(
+    () =>
+      Json2Elements(
+        testDict,
+        bitLineObj,
+        positionObj,
+        grid,
+        elementArray.current,
+        forceRender
+      ),
     [testDict]
   );
 
-  const handleClick = (e: KeyboardEvent) => {
+  const handleClick = useCallback((e: KeyboardEvent) => {
     if (e.key === "1") {
       setShowGrid((prev) => !prev);
     }
-  };
+  }, []);
 
   useEffect(() => {
     window.addEventListener("keypress", handleClick);
@@ -548,7 +571,8 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
     <div>Loading</div>
   ) : (
     <>
-      {circuit}
+      {console.log("rendered array: ", _.clone(elementArray.current))}
+      {...elementArray.current} {/*ffs*/}
       <div
         style={{
           position: "absolute",

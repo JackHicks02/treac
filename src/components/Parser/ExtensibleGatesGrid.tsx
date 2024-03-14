@@ -82,6 +82,7 @@ interface BitNodeProps {
   positionObj: Dictionary<GridItem>;
   CLine: BitLine;
   label?: string;
+  forceRender?: () => void;
 }
 
 export const BitNode: FC<BitNodeProps> = ({
@@ -90,12 +91,18 @@ export const BitNode: FC<BitNodeProps> = ({
   positionObj,
   label,
   keyID,
+  forceRender,
 }) => {
   const [gridItem, setGridItem] = useState<GridItem>(position);
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const render = useRender();
   const style = useStyle()[0];
+
+  forceRender &&
+    useEffect(() => {
+      forceRender();
+    }, []);
 
   useMemo(() => {
     positionObj[keyID] = position;
@@ -159,6 +166,8 @@ interface NGate {
   position: GridItem;
   grid: GridItem[][];
   func: nFunc;
+  handleAwait: (awaitKey: string) => void;
+  forceRender: () => void;
 }
 
 export const NGate: FC<NGate> = ({
@@ -170,6 +179,8 @@ export const NGate: FC<NGate> = ({
   keyID,
   func,
   label,
+  handleAwait,
+  forceRender,
 }) => {
   const style = useStyle()[0];
   const dimensions = useRef({
@@ -368,8 +379,11 @@ export const NGate: FC<NGate> = ({
               key={`${keyID}right${leftIndex}`}
               position={grid[x][y]}
               CLine={outLine[2]}
+              forceRender={forceRender}
             />
           );
+
+          handleAwait(`${keyID}right${rightIndex}`);
           rightIndex++;
           break;
         case "top":
