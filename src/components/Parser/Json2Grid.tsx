@@ -2,6 +2,7 @@ import {
   FC,
   useCallback,
   useEffect,
+  useId,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -13,8 +14,6 @@ import {
   NAND,
   SquareVectorFromObj,
   BitNode,
-  BinaryGate,
-  UnaryGate,
   NGate,
 } from "./ExtensibleGatesGrid";
 import {
@@ -88,13 +87,8 @@ const mapDictToElems = (
   console.log("processing: ", _key);
 
   const handleAwait = (awaitKey: string) => {
-    console.log("handle await: ", awaitKey);
-
     if (awaitingKeys.hasOwnProperty(awaitKey)) {
       console.log(awaitKey, " found for ", awaitingKeys[awaitKey]);
-
-      console.log(_.clone(ElementArray));
-
       mapDictToElems(
         JSON,
         awaitingKeys[awaitKey],
@@ -106,13 +100,7 @@ const mapDictToElems = (
         awaitingKeys,
         forceRender
       );
-      console.log(awaitingKeys);
-
-      console.log(_.clone(ElementArray));
-
       delete awaitingKeys[awaitKey];
-
-      console.log(awaitingKeys);
     }
   };
 
@@ -141,7 +129,7 @@ const mapDictToElems = (
       } else {
         ElementArray.push(
           <SquareVectorFromObj
-            key={""}
+            key={entry.elementProps.position + "-" + _key}
             positionObj={positionObj}
             bitLine={CLine}
             originKey={entry.connect}
@@ -220,16 +208,15 @@ const mapDictToElems = (
 
       nodes.forEach((node) => {
         if (node[1] === "out") {
-          bitLineObj[_key + node[0] + outCount] = new BitLine(
-            defaults[outCount]
-          );
-          outsWithLine.push([...node, bitLineObj[_key + node[0] + outCount]]);
+          bitLineObj[_key + "out" + outCount] = new BitLine(defaults[outCount]);
+          outsWithLine.push([...node, bitLineObj[_key + "out" + outCount]]);
           outCount++;
         }
       });
 
       ElementArray.unshift(
         <NGate
+          key={_key}
           label={label}
           keyID={_key}
           ins={insWithLine}
@@ -252,7 +239,6 @@ const mapDictToElems = (
       };
 
       insWithLine.forEach((inLine) => {
-        //  positionObj[`${keyID}Left${leftIndex}`] = grid[x][y];
         ElementArray.push(
           <SquareVectorFromObj
             key={_key + inLine[0] + dimensions[inLine[0]] + "vec"}
@@ -267,8 +253,7 @@ const mapDictToElems = (
       break;
 
     default:
-      //throw new Error(`No component by the name of ${entry.elementName}`);
-      break;
+      throw new Error(`No component by the name of ${entry.elementName}`);
   }
 
   handleAwait(_key);
@@ -348,7 +333,6 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
 
   useEffect(() => {
     xOffset.current = (menuRef?.current?.clientWidth ?? 0) + 16;
-
     const _grid: GridItem[][] = [];
     for (let i = 0; i < gridSize.width; i++) {
       const row = [];
@@ -567,11 +551,16 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
     return () => window.removeEventListener("keypress", handleClick);
   }, []);
 
+  console.log("rendered array: ", ...elementArray.current);
+
+  console.log(positionObj);
+
+  console.log(bitLineObj);
+
   return loading ? (
     <div>Loading</div>
   ) : (
     <>
-      {console.log("rendered array: ", _.clone(elementArray.current))}
       {...elementArray.current} {/*ffs*/}
       <div
         style={{

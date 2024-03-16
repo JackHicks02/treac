@@ -1,7 +1,5 @@
 import { ReactNode, createContext, useContext } from "react";
 import { Coordinate } from "../../app";
-import { BitLine, BitNode, NAND, OR, XOR } from "../Squidward/Gates";
-import SquareVector from "../Squidward/SquareVector";
 import { JsonGateDict } from "../../types/types";
 import Json2Gates from "../Parser/Json2Gates";
 

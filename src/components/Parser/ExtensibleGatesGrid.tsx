@@ -349,19 +349,19 @@ export const NGate: FC<NGate> = ({
           break;
       }
     });
-    outs.forEach((outLine) => {
+    outs.forEach((outLine, index) => {
       let x = position.x;
       let y = position.y;
 
       switch (outLine[0]) {
         case "left":
           y += 2 * leftIndex + 1 + leftOffset;
-          positionObj[`${keyID}left${leftIndex}`] = grid[x][y];
+          positionObj[`${keyID}out${index}`] = grid[x][y];
           DryNodes.current.push(
             <BitNode
               positionObj={positionObj}
-              keyID={`${keyID}left${leftIndex}`}
-              key={`${keyID}left${leftIndex}`}
+              keyID={`${keyID}out${index}`}
+              key={`${keyID}out${index}`}
               position={grid[x][y]}
               CLine={outLine[2]}
               forceRender={forceRender}
@@ -372,29 +372,29 @@ export const NGate: FC<NGate> = ({
         case "right":
           x += rawDims.current.width;
           y += 2 * rightIndex + 1 + rightOffset;
-          positionObj[`${keyID}right${rightIndex}`] = grid[x][y];
+          positionObj[`${keyID}out${index}`] = grid[x][y];
           DryNodes.current.push(
             <BitNode
               positionObj={positionObj}
-              keyID={`${keyID}right${rightIndex}`}
-              key={`${keyID}right${leftIndex}`}
+              keyID={`${keyID}out${index}`}
+              key={`${keyID}out${index}`}
               position={grid[x][y]}
               CLine={outLine[2]}
               forceRender={forceRender}
             />
           );
 
-          handleAwait(`${keyID}right${rightIndex}`);
+          handleAwait(`${keyID}out${index}`);
           rightIndex++;
           break;
         case "top":
           x += 2 * topIndex + 1 + topOffset;
-          positionObj[`${keyID}top${topIndex}`] = grid[x][y];
+          positionObj[`${keyID}out${index}`] = grid[x][y];
           DryNodes.current.push(
             <BitNode
               positionObj={positionObj}
-              keyID={`${keyID}top${topIndex}`}
-              key={`${keyID}top${leftIndex}`}
+              keyID={`${keyID}out${index}`}
+              key={`${keyID}out${index}`}
               position={grid[x][y]}
               CLine={outLine[2]}
               forceRender={forceRender}
@@ -405,12 +405,12 @@ export const NGate: FC<NGate> = ({
         case "bottom":
           x += 2 * bottomIndex + 1 + bottomOffset;
           y += rawDims.current.height;
-          positionObj[`${keyID}bottom${bottomIndex}`] = grid[x][y];
+          positionObj[`${keyID}out${index}`] = grid[x][y];
           DryNodes.current.push(
             <BitNode
               positionObj={positionObj}
-              keyID={`${keyID}bottom${bottomIndex}`}
-              key={`${keyID}bottom${leftIndex}`}
+              keyID={`${keyID}out${index}`}
+              key={`${keyID}out${index}`}
               position={grid[x][y]}
               CLine={outLine[2]}
               forceRender={forceRender}
