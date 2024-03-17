@@ -23,8 +23,8 @@ export const tabsDict: TabsDict = {
 };
 
 export const Nand2Infinity: TabsDict = {
-  "Two bit gates": <NAND2GATES />,
-  "Multi bit Gate": (
+  Nand2Gates: <NAND2GATES />,
+  "Multi-bit Gates": (
     <Json2Grid dict={multiBitAnd} height={200} key="multiBitAnd" />
   ),
 };

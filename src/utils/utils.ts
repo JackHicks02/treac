@@ -1,6 +1,6 @@
 //Anything which is a js secret object or prototype (ie arrays and functions) is pass by reference
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useRender } from "./useRender";
 import { BitLine } from "../components/Squidward/Gates";
 import { BitInOut } from "../types/types";
@@ -13,7 +13,7 @@ import { BitInOut } from "../types/types";
  * @template T The type of the elements in the array.
  */
 export const removeElement = <T>(array: T[], elementToRemove: T): T[] => {
-  return array.filter(element => element !== elementToRemove);
+  return array.filter((element) => element !== elementToRemove);
 };
 
 /**
@@ -23,63 +23,72 @@ export const removeElement = <T>(array: T[], elementToRemove: T): T[] => {
  * @template T The type of the elements in the arrays.
  */
 export const removeElementFromMany = <T>(arrays: T[][], elementToRemove: T) => {
-  arrays.forEach((array)=> removeElement(array, elementToRemove))
-}
+  arrays.forEach((array) => removeElement(array, elementToRemove));
+};
 
 export const useNLineMount = (nodes: BitInOut[], newValue: boolean[]) => {
   const render = useRender();
-  const ins = useRef<BitLine[]>([])
-  const outs = useRef<BitLine[]>([])
+  const ins = useRef<BitLine[]>([]);
+  const outs = useRef<BitLine[]>([]);
 
-  useEffect(()=>{
-    nodes.forEach((entry)=>{
-      entry[0] === "in" ? ins.current.push(entry[1]): outs.current.push(entry[1])
-    })
+  useEffect(() => {
+    nodes.forEach((entry) => {
+      entry[0] === "in"
+        ? ins.current.push(entry[1])
+        : outs.current.push(entry[1]);
+    });
 
-    ins.current.forEach(bitLine=> bitLine.pushSetter(render))
-    
+    ins.current.forEach((bitLine) => bitLine.pushSetter(render));
 
     return () => {
-      ins.current.forEach(bitline => bitline.removeSetter(render))
-    }
-  }, [])
+      ins.current.forEach((bitline) => bitline.removeSetter(render));
+    };
+  }, []);
 
-  outs.current.forEach((bitLine, index)=>bitLine.setBit(newValue[index]))
-}
+  outs.current.forEach((bitLine, index) => bitLine.setBit(newValue[index]));
+};
 
-export const useTwoLineMount = (ALine: BitLine, BLine: BitLine, CLine: BitLine, newValue: boolean) => {
+export const useTwoLineMount = (
+  ALine: BitLine,
+  BLine: BitLine,
+  CLine: BitLine,
+  newValue: boolean
+) => {
   const render = useRender();
 
   useEffect(() => {
-    ALine.pushSetter(render)
+    ALine.pushSetter(render);
     BLine.pushSetter(render);
     //This is actually pretty stupid...
     //These gates don't need to render when their lines change
     //Later on they should have nodes that reflect change or this whole thing is stupid
 
     return () =>
-        [ALine, BLine].forEach(bitLine => bitLine.removeSetter(render))
+      [ALine, BLine].forEach((bitLine) => bitLine.removeSetter(render));
   }, []);
 
   CLine.setBit(newValue);
-}
+};
 
-export const useUnaryMount = (ALine: BitLine, CLine: BitLine, newValue: boolean) => {
-  const render = useRender()
-  useEffect(()=> {
+export const useUnaryMount = (
+  ALine: BitLine,
+  CLine: BitLine,
+  newValue: boolean
+) => {
+  const render = useRender();
+  useEffect(() => {
     ALine.pushSetter(render);
-    return () => ALine.removeSetter(render)
-  }, [])
+    return () => ALine.removeSetter(render);
+  }, []);
 
-  CLine.setBit(newValue)
-}
+  CLine.setBit(newValue);
+};
 
 export const useOneLineMount = (BitLine: BitLine) => {
-  const render = useRender()
- useEffect(()=> {
-  BitLine.pushSetter(render);
+  const render = useRender();
+  useEffect(() => {
+    BitLine.pushSetter(render);
 
-  return () => BitLine.removeSetter(render)
-   }, [])
-
-}
+    return () => BitLine.removeSetter(render);
+  }, []);
+};

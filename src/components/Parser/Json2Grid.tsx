@@ -1,13 +1,4 @@
-import {
-  FC,
-  useCallback,
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BitLine } from "../Squidward/Gates";
 import { Coordinate, useMenuContext } from "../../app";
 import {
@@ -20,7 +11,6 @@ import {
   Dictionary,
   JsonGateDict,
   ElementArray,
-  unFunc,
   nFunc,
   Side,
   GateEntry,
@@ -422,7 +412,7 @@ const Json2Grid: FC<Json2GatesProps> = ({ dict, width, height }) => {
           elementProps: {
             position: xy(26, 22, _grid),
           },
-          connect: "testright0",
+          connect: "testout0",
         },
 
         a0: {
