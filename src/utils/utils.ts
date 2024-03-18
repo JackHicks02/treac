@@ -92,3 +92,5 @@ export const useOneLineMount = (BitLine: BitLine) => {
     return () => BitLine.removeSetter(render);
   }, []);
 };
+
+export const xor = (a: boolean, b: boolean): boolean => (a && !b) || (!a && b);

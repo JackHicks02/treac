@@ -2,7 +2,7 @@ import { GridPage } from "../Pages/GridTest";
 import NodesAndVectors from "../Pages/NodesAndVectors";
 import Parser from "../Pages/Parser";
 import Propogation from "../Pages/Propogation";
-import { multiBitAnd } from "../circuits";
+import { arithmetic, multiBitAnd } from "../circuits";
 import NAND2GATES from "../components/NAND/NANDPage";
 import Json2Gates from "../components/Parser/Json2Gates";
 import Json2Grid from "../components/Parser/Json2Grid";
@@ -27,4 +27,5 @@ export const Nand2Infinity: TabsDict = {
   "Multi-bit Gates": (
     <Json2Grid dict={multiBitAnd} height={200} key="multiBitAnd" />
   ),
+  Arithmetic: <Json2Grid dict={arithmetic} height={200} key="Arithmetic" />,
 };

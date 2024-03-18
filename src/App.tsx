@@ -45,7 +45,7 @@ function App() {
       <MenuContext.Provider value={menuRef}>
         <JemContextProvider
           contextKey="tab"
-          defaultValue={Object.keys(Nand2Infinity)[1]}
+          defaultValue={Object.keys(Nand2Infinity)[2]}
         >
           <MousePositionProvider>
             <GateStyleProvider>
@@ -108,6 +108,20 @@ function App() {
             70% {background-color: indigo;}
             84% {background-color: violet;}
             100% {background-color: red;}
+          }
+
+          @keyframes rainbow-static-text {
+            0% {color: red;}
+            14% {color: orange;}
+            28% {color: yellow;}
+            42% {color: green;}
+            56% {color: blue;}
+            70% {color: indigo;}
+            84% {color: violet;}
+            100% {color: red;}
+          }
+          .rainbow-text {
+            animation: rainbow-static-text 8s linear infinite;
           }
 
           .rainbow{

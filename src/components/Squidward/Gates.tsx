@@ -75,12 +75,14 @@ interface LabelProps {
   position: Coordinate;
 }
 const Label: FC<LabelProps> = ({ children, position }) => {
+  let localPos = position;
+
   return (
     <div
       style={{
         position: "absolute",
-        left: position[0],
-        top: position[1],
+        left: localPos[0],
+        top: localPos[1],
         color: "red",
         zIndex: 4,
         fontSize: 20,
@@ -131,14 +133,7 @@ export const NOT: FC<OneLineProps> = ({ position, CLine, ALine }) => {
   return <></>;
 };
 
-export const OR: FC<TwoLineProps> = ({
-  position,
-  CLine,
-  ALine,
-  BLine,
-  nodePositions,
-  selfReference,
-}) => {
+export const OR: FC<TwoLineProps> = ({ CLine, ALine, BLine }) => {
   const [a, b] = [ALine.getBit(), BLine.getBit()];
 
   const c = a || b;

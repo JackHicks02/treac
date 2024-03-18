@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { Dictionary, GateEntry, JsonGateDict } from "./types/types";
+import { xor } from "./utils/utils";
 
 const stdLib = {
   nodeLine: ({ x, y, amount, vertical, connects, awaits }: Dictionary<any>) => {
@@ -132,7 +133,7 @@ const stdLib = {
       },
     ];
   },
-  multiWayOr: ({ position, nodes }: Dictionary<any>) => {
+  or: ({ position, nodes }: Dictionary<any>) => {
     return [
       {
         elementName: "custom",
@@ -147,11 +148,57 @@ const stdLib = {
       },
     ];
   },
+  halfAdder: ({ position, nodes }: Dictionary<any>) => {
+    return [
+      {
+        elementName: "custom",
+        elementProps: {
+          nodes: nodes,
+          position: position,
+          func: (inputs: boolean[]): boolean[] => {
+            const outs = [false, false];
+            if (xor(inputs[0], inputs[1])) {
+              outs[0] = true;
+            }
+            if (inputs[0] && inputs[1]) {
+              outs[1] = true;
+            }
+            return outs;
+          },
+          label: "H-ADD",
+        },
+      },
+    ];
+  },
+  fullAdder: ({ position, nodes }: Dictionary<any>) => {
+    return [
+      {
+        elementName: "custom",
+        elementProps: {
+          nodes: nodes,
+          position: position,
+          func: (inputs: boolean[]): boolean[] => {
+            const outs = [false, false];
+            if (xor(xor(inputs[0], inputs[1]), inputs[2])) {
+              outs[0] = true;
+            }
+            if (
+              (inputs[0] && inputs[1]) ||
+              (inputs[2] && xor(inputs[0], inputs[1]))
+            ) {
+              outs[1] = true;
+            }
+            return outs;
+          },
+          label: "F-ADD",
+        },
+      },
+    ];
+  },
 };
 
 export const multiBitAnd: JsonGateDict = {
   declare: {
-    //name must be first parameter
     ...stdLib,
   },
   notIN: JSON.stringify({
@@ -431,6 +478,253 @@ export const multiBitAnd: JsonGateDict = {
       ["right", "out"],
       ["right", "out"],
       ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+};
+
+export const arithmetic: JsonGateDict = {
+  declare: {
+    ...stdLib,
+  },
+
+  halfAdderA0: {
+    elementName: "node",
+    elementProps: {
+      position: [1, 2],
+    },
+  },
+  halfAdderB0: {
+    elementName: "node",
+    elementProps: {
+      position: [1, 4],
+    },
+  },
+  halfAdderXOR: JSON.stringify({
+    name: "xor",
+    position: [6, 1],
+    nodes: [
+      ["left", "halfAdderA0Joint"],
+      ["left", "halfAdderB0Joint"],
+      ["right", "out"],
+    ],
+  }),
+  halfAdderA0Joint: {
+    elementName: "node",
+    elementProps: {
+      position: [3, 2],
+      invisible: true,
+    },
+    connect: "halfAdderA0",
+  },
+  halfAdderB0Joint: {
+    elementName: "node",
+    elementProps: {
+      position: [4, 4],
+      invisible: true,
+    },
+    connect: "halfAdderB0",
+  },
+  halfAdderA0Joint2: {
+    elementName: "node",
+    elementProps: {
+      position: [3, 7],
+      invisible: true,
+    },
+    connect: "halfAdderA0Joint",
+  },
+  halfAdderB0Joint2: {
+    elementName: "node",
+    elementProps: {
+      position: [4, 9],
+      invisible: true,
+    },
+    connect: "halfAdderB0Joint",
+  },
+  halfAdderAnd: JSON.stringify({
+    name: "and",
+    position: [6, 6],
+    nodes: [
+      ["left", "halfAdderA0Joint2"],
+      ["left", "halfAdderB0Joint2"],
+      ["right", "out"],
+    ],
+  }),
+  halfAdderSumOut: {
+    elementName: "node",
+    elementProps: {
+      position: [12, 3],
+      label: "sum",
+      await: "halfAdderXOR0out0",
+    },
+    connect: "halfAdderXOR0out0",
+  },
+  halfAdderCarryOut: {
+    elementName: "node",
+    elementProps: {
+      position: [12, 8],
+      label: "carry",
+      await: "halfAdderAnd0out0",
+    },
+    connect: "halfAdderAnd0out0",
+  },
+  label: {
+    elementName: "node",
+    elementProps: {
+      position: [13, 11],
+      label: "HALF-ADDER",
+      invisible: true,
+    },
+  },
+  hAddA: {
+    elementName: "node",
+    elementProps: {
+      position: [18, 4],
+    },
+  },
+  hAddB: {
+    elementName: "node",
+    elementProps: {
+      position: [18, 6],
+    },
+  },
+  halfAdder: JSON.stringify({
+    name: "halfAdder",
+    position: [20, 3],
+    nodes: [
+      ["left", "hAddA"],
+      ["left", "hAddB"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  fullInA: {
+    elementName: "node",
+    elementProps: {
+      position: [34, 2],
+    },
+  },
+  fullInB: {
+    elementName: "node",
+    elementProps: {
+      position: [34, 4],
+    },
+  },
+  fullInH0: JSON.stringify({
+    name: "halfAdder",
+    position: [36, 1],
+    nodes: [
+      ["left", "fullInA"],
+      ["left", "fullInB"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  carryIn: {
+    elementName: "node",
+    elementProps: {
+      position: [34, 8],
+      label: "carry in",
+    },
+  },
+  carryInJoint1: {
+    elementName: "node",
+    elementProps: {
+      position: [44, 8],
+      invisible: true,
+    },
+    connect: "carryIn",
+  },
+  carryInJoint2: {
+    elementName: "node",
+    elementProps: {
+      position: [44, 4],
+      invisible: true,
+    },
+    connect: "carryInJoint1",
+  },
+  fullInH1: JSON.stringify({
+    name: "halfAdder",
+    position: [46, 1],
+    nodes: [
+      ["left", "fullInH00out0"],
+      ["left", "carryInJoint2"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  fullInH0CarryJoint: {
+    elementName: "node",
+    elementProps: {
+      position: [42, 4],
+      await: "fullInH00out1",
+      invisible: true,
+    },
+    connect: "fullInH00out1",
+  },
+  fullInH0CarryJoint2: {
+    elementName: "node",
+    elementProps: {
+      position: [42, 9],
+      await: "fullInH0CarryJoint",
+      invisible: true,
+    },
+    connect: "fullInH0CarryJoint",
+  },
+  carryOR: JSON.stringify({
+    name: "or",
+    position: [52, 6],
+    nodes: [
+      ["left", "fullInH10out1"],
+      ["left", "fullInH0CarryJoint2"],
+      ["right", "out"],
+    ],
+  }),
+  fullSumOut: {
+    elementName: "node",
+    elementProps: {
+      position: [60, 2],
+      label: "sum",
+      await: "fullInH10out0",
+    },
+    connect: "fullInH10out0",
+  },
+  fullCarryOut: {
+    elementName: "node",
+    elementProps: {
+      position: [60, 5],
+      label: "carry",
+      await: "carryOR0out0",
+    },
+    connect: "carryOR0out0",
+  },
+
+  fullInA0: {
+    elementName: "node",
+    elementProps: {
+      position: [68, 2],
+    },
+  },
+  fullInB0: {
+    elementName: "node",
+    elementProps: {
+      position: [68, 4],
+    },
+  },
+  fullInC0: {
+    elementName: "node",
+    elementProps: {
+      position: [68, 6],
+    },
+  },
+  fullAdder: JSON.stringify({
+    name: "fullAdder",
+    position: [70, 1],
+    nodes: [
+      ["left", "fullInA0"],
+      ["left", "fullInB0"],
+      ["left", "fullInC0"],
       ["right", "out"],
       ["right", "out"],
     ],

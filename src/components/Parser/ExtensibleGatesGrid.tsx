@@ -59,7 +59,7 @@ interface LabelProps {
   children: ReactNode;
   position: Coordinate;
 }
-const Label: FC<LabelProps> = ({ children, position }) => {
+export const Label: FC<LabelProps> = ({ children, position }) => {
   return (
     <div
       style={{
@@ -83,6 +83,7 @@ interface BitNodeProps {
   CLine: BitLine;
   label?: string;
   forceRender?: () => void;
+  invisible?: boolean;
 }
 
 export const BitNode: FC<BitNodeProps> = ({
@@ -92,6 +93,7 @@ export const BitNode: FC<BitNodeProps> = ({
   label,
   keyID,
   forceRender,
+  invisible,
 }) => {
   const [gridItem, setGridItem] = useState<GridItem>(position);
   const [isDraggable, setIsDraggable] = useState(false);
@@ -131,21 +133,25 @@ export const BitNode: FC<BitNodeProps> = ({
 
   return (
     <>
-      <div
-        className={CLine.getBit() ? "rainbow" : ""}
-        style={{
-          position: "absolute",
-          zIndex: 3,
-          left: gridItem.getCoords()[0],
-          top: gridItem.getCoords()[1],
-          height: "12px",
-          width: "12px",
-          transform: "translate(-50%, -50%)",
-          backgroundColor: CLine.getBit() ? style.defaultOn : style.defaultOff,
-          borderRadius: "12px",
-        }}
-        onClick={handleClick}
-      />
+      {!invisible && (
+        <div
+          className={CLine.getBit() ? "rainbow" : ""}
+          style={{
+            position: "absolute",
+            zIndex: 3,
+            left: gridItem.getCoords()[0],
+            top: gridItem.getCoords()[1],
+            height: "12px",
+            width: "12px",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: CLine.getBit()
+              ? style.defaultOn
+              : style.defaultOff,
+            borderRadius: "12px",
+          }}
+          onClick={handleClick}
+        />
+      )}
       {label && position && (
         <Label
           position={[gridItem.getCoords()[0] - 12, gridItem.getCoords()[1] + 6]}

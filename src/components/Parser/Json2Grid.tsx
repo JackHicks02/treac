@@ -6,6 +6,7 @@ import {
   SquareVectorFromObj,
   BitNode,
   NGate,
+  Label,
 } from "./ExtensibleGatesGrid";
 import {
   Dictionary,
@@ -178,7 +179,6 @@ const mapDictToElems = (
         />
       );
       break;
-
     case "custom":
       const nodes = entry.elementProps.nodes as [Side, string][];
       const label = entry.elementProps.label as string;
@@ -241,7 +241,13 @@ const mapDictToElems = (
         dimensions[inLine[0]] = dimensions[inLine[0]] + 1;
       });
       break;
-
+    case "label":
+      ElementArray.unshift(
+        <Label position={entry.elementProps.position}>
+          {entry.elementProps.text}
+        </Label>
+      );
+      break;
     default:
       throw new Error(`No component by the name of ${entry.elementName}`);
   }

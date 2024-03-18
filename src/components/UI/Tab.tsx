@@ -17,7 +17,7 @@ const Tab = () => {
         backgroundColor: "black",
         overflow: "auto",
       }}
-      // ref={mouseContext}
+      ref={mouseContext}
     >
       {tabsDict[tabJem.getValue()] ?? Nand2Infinity[tabJem.getValue()]}
     </div>
