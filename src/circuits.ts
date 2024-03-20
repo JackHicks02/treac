@@ -3,13 +3,32 @@ import { Dictionary, GateEntry, JsonGateDict } from "./types/types";
 import { xor } from "./utils/utils";
 
 const stdLib = {
-  nodeLine: ({ x, y, amount, vertical, connects, awaits }: Dictionary<any>) => {
+  nodeLine: ({
+    x,
+    y,
+    amount,
+    vertical,
+    connects,
+    awaits,
+    spacing = 2,
+    diagonal = false,
+  }: Dictionary<any>) => {
     const nodes: Dictionary<GateEntry> = {};
+
+    let diagFactor = 1;
+
+    if (diagonal === "-") {
+      diagFactor = -1;
+    }
+
     for (let i = 0; i < amount; i++) {
       nodes[i] = {
         elementName: "node",
         elementProps: {
-          position: [x + (!vertical ? 2 * i : 0), y + (vertical ? 2 * i : 0)],
+          position: [
+            x + (!vertical || diagonal ? spacing * i : 0),
+            y + (vertical || diagonal ? spacing * diagFactor * i : 0),
+          ],
         },
       };
     }
@@ -725,6 +744,199 @@ export const arithmetic: JsonGateDict = {
       ["left", "fullInA0"],
       ["left", "fullInB0"],
       ["left", "fullInC0"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+
+  aLine: JSON.stringify({
+    name: "nodeLine",
+    x: 1,
+    y: 50,
+    amount: 16,
+    spacing: 8,
+  }),
+  bLine: JSON.stringify({
+    name: "nodeLine",
+    x: 1,
+    y: 60,
+    amount: 16,
+    spacing: 8,
+  }),
+  addStart: JSON.stringify({
+    name: "halfAdder",
+    position: [1, 52],
+    nodes: [
+      ["left", "aLine0"],
+      ["left", "bLine0"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  add0: JSON.stringify({
+    name: "fullAdder",
+    position: [11, 52],
+    nodes: [
+      ["left", "aLine1"],
+      ["left", "bLine1"],
+      ["left", "addStart0out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  add1: JSON.stringify({
+    name: "fullAdder",
+    position: [19, 52],
+    nodes: [
+      ["left", "aLine2"],
+      ["left", "bLine2"],
+      ["left", "add00out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  add2: JSON.stringify({
+    name: "fullAdder",
+    position: [27, 52],
+    nodes: [
+      ["left", "aLine3"],
+      ["left", "bLine3"],
+      ["left", "add10out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  add3: JSON.stringify({
+    name: "fullAdder",
+    position: [35, 52],
+    nodes: [
+      ["left", "aLine4"],
+      ["left", "bLine4"],
+      ["left", "add20out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  add4: JSON.stringify({
+    name: "fullAdder",
+    position: [43, 52],
+    nodes: [
+      ["left", "aLine5"],
+      ["left", "bLine5"],
+      ["left", "add30out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  add5: JSON.stringify({
+    name: "fullAdder",
+    position: [51, 52],
+    nodes: [
+      ["left", "aLine6"],
+      ["left", "bLine6"],
+      ["left", "add40out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  add6: JSON.stringify({
+    name: "fullAdder",
+    position: [59, 52],
+    nodes: [
+      ["left", "aLine7"],
+      ["left", "bLine7"],
+      ["left", "add50out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  add7: JSON.stringify({
+    name: "fullAdder",
+    position: [67, 52],
+    nodes: [
+      ["left", "aLine8"],
+      ["left", "bLine8"],
+      ["left", "add60out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  add8: JSON.stringify({
+    name: "fullAdder",
+    position: [75, 52],
+    nodes: [
+      ["left", "aLine9"],
+      ["left", "bLine9"],
+      ["left", "add70out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  add9: JSON.stringify({
+    name: "fullAdder",
+    position: [83, 52],
+    nodes: [
+      ["left", "aLine10"],
+      ["left", "bLine10"],
+      ["left", "add80out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  //add10 is a problem because add10 will happen from add1, apparently :/
+  //Hex it is
+  addA: JSON.stringify({
+    name: "fullAdder",
+    position: [91, 52],
+    awaits: "add90out1",
+    nodes: [
+      ["left", "aLine11"],
+      ["left", "bLine11"],
+      ["left", "add90out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  addB: JSON.stringify({
+    name: "fullAdder",
+    position: [99, 52],
+    nodes: [
+      ["left", "aLine12"],
+      ["left", "bLine12"],
+      ["left", "addA0out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  addC: JSON.stringify({
+    name: "fullAdder",
+    position: [107, 52],
+    nodes: [
+      ["left", "aLine13"],
+      ["left", "bLine13"],
+      ["left", "addB0out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  addD: JSON.stringify({
+    name: "fullAdder",
+    position: [115, 52],
+    nodes: [
+      ["left", "aLine14"],
+      ["left", "bLine14"],
+      ["left", "addC0out1"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  addE: JSON.stringify({
+    name: "fullAdder",
+    position: [123, 52],
+    nodes: [
+      ["left", "aLine15"],
+      ["left", "bLine15"],
+      ["left", "addD0out1"],
       ["right", "out"],
       ["right", "out"],
     ],
