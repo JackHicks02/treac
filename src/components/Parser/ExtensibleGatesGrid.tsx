@@ -734,6 +734,8 @@ interface SquareVectorProps {
   destinationKey: string;
   positionObj: Dictionary<GridItem>;
   bitLine: BitLine;
+  straight?: boolean;
+  invisible?: boolean;
 }
 
 export const SquareVectorFromObj: FC<SquareVectorProps> = ({
@@ -741,6 +743,8 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
   destinationKey,
   positionObj,
   bitLine,
+  straight,
+  invisible,
 }) => {
   const [_origin, _setOrigin] = useState(positionObj[originKey]);
   const [_destination, _setDestination] = useState(positionObj[destinationKey]);
@@ -755,7 +759,26 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
     _destination.getCoords()[1] > _origin.getCoords()[1] ? 1 : -1;
   const bgColour: string = bitLine.getBit() ? style.vectorOn : style.vectorOff;
 
-  return (
+  if (invisible) {
+    return <></>;
+  }
+
+  return straight ? (
+    <>
+      <svg style={{ width: "100%", height: "100%", position: "absolute" }}>
+        {_origin.getCoords().toString()} {_destination.getCoords().toString()}
+        <line
+          key={`line-${_origin}-${_destination}`}
+          x1={_origin.getCoords()[0]}
+          y1={_origin.getCoords()[1]}
+          x2={_destination.getCoords()[0]}
+          y2={_destination.getCoords()[1]}
+          stroke={isOn ? style.defaultOn : style.defaultOff}
+          strokeWidth={style.vectorThickness || "2"}
+        />
+      </svg>
+    </>
+  ) : (
     <>
       <div
         className={isOn ? "rainbow" : ""}

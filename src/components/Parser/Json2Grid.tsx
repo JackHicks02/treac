@@ -125,6 +125,8 @@ const mapDictToElems = (
             bitLine={CLine}
             originKey={entry.connect}
             destinationKey={_key}
+            straight={entry.elementProps.straight}
+            invisible={entry.elementProps.linesInvisible}
           />
         );
       }
@@ -167,6 +169,7 @@ const mapDictToElems = (
           originKey={entry.elementProps.A}
           destinationKey={_key + "A"}
           bitLine={findConnection(entry.elementProps.A, _key)!}
+          straight={entry.elementProps.straight ?? false}
         />
       );
       ElementArray.push(
@@ -176,6 +179,7 @@ const mapDictToElems = (
           originKey={entry.elementProps.B}
           destinationKey={_key + "B"}
           bitLine={findConnection(entry.elementProps.B, _key)!}
+          straight={entry.elementProps.straight ?? false}
         />
       );
       break;
@@ -236,6 +240,7 @@ const mapDictToElems = (
             originKey={inLine[1]}
             destinationKey={_key + inLine[0] + dimensions[inLine[0]]}
             bitLine={findConnection(inLine[1], _key)!}
+            straight={entry.elementProps.straight ?? false}
           />
         );
         dimensions[inLine[0]] = dimensions[inLine[0]] + 1;
