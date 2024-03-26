@@ -220,6 +220,85 @@ const stdLib = {
       },
     ];
   },
+  add: ({ position, nodes, bit }: Dictionary<any>) => {
+    //i[0..] - A
+    //i[bit...] - B
+    return [
+      {
+        elementName: "custom",
+        elementProps: {
+          nodes: nodes,
+          position: position,
+          func: (inputs: boolean[]): boolean[] => {
+            const outs: boolean[] = [];
+            let carry = false;
+            for (let i = 0; i < bit; i++) {
+              const a = inputs[i];
+              const b = inputs[i + bit];
+
+              const sum = (a !== b) !== carry;
+              outs[i] = sum;
+
+              carry = (a && b) || (a && carry) || (b && carry);
+            }
+            // Handle the carry out for the last bit
+            outs[bit] = carry;
+
+            return outs;
+          },
+          label: "ADD",
+        },
+      },
+    ];
+  },
+  increment: ({ position, nodes, bit }: Dictionary<any>) => {
+    //i[0..] - A
+    //i[bit...] - B
+    return [
+      {
+        elementName: "custom",
+        elementProps: {
+          nodes: nodes,
+          position: position,
+          func: (inputs: boolean[]): boolean[] => {
+            const outs: boolean[] = [];
+            let carry = false;
+            const b = inputs[bit];
+            for (let i = 0; i < bit; i++) {
+              const a = inputs[i];
+
+              const sum = (a !== b) !== carry;
+              outs[i] = sum;
+
+              carry = (a && b) || (a && carry) || (b && carry);
+            }
+            // Handle the carry out for the last bit
+            outs[bit] = carry;
+
+            return outs;
+          },
+          label: "ADD",
+        },
+      },
+    ];
+  },
+  test: ({ id }: { id: string }) => {
+    return [
+      {
+        elementName: "node",
+        elementProps: {
+          position: [20, 20],
+        },
+      },
+      {
+        elementName: "node",
+        elementProps: {
+          position: [30, 20],
+        },
+      },
+      stdLib.not({ position: [40, 40], nodes: [["left", id + 1]] })[0],
+    ];
+  },
 };
 
 export const multiBitAnd: JsonGateDict = {
@@ -297,7 +376,6 @@ export const multiBitAnd: JsonGateDict = {
     ],
     awaits: true,
   }),
-
   andIns: JSON.stringify({
     name: "nodeLine",
     x: 2,
@@ -365,7 +443,6 @@ export const multiBitAnd: JsonGateDict = {
       ["right", "out"],
     ],
   }),
-
   orIns: JSON.stringify({
     name: "nodeLine",
     x: 14,
@@ -513,7 +590,6 @@ export const arithmetic: JsonGateDict = {
   declare: {
     ...stdLib,
   },
-
   halfAdderA0: {
     elementName: "node",
     elementProps: {
@@ -724,7 +800,14 @@ export const arithmetic: JsonGateDict = {
     },
     connect: "carryOR0out0",
   },
-
+  labelFull: {
+    elementName: "node",
+    elementProps: {
+      invisible: true,
+      position: [63, 11],
+      label: "FULL-ADDER",
+    },
+  },
   fullInA0: {
     elementName: "node",
     elementProps: {
@@ -766,7 +849,6 @@ export const arithmetic: JsonGateDict = {
     y: 70,
     amount: 16,
   }),
-
   aLine: JSON.stringify({
     name: "nodeLine",
     x: 1,
@@ -794,7 +876,6 @@ export const arithmetic: JsonGateDict = {
       "aIns0",
     ],
   }),
-
   bLine: JSON.stringify({
     name: "nodeLine",
     x: 1,
@@ -999,7 +1080,6 @@ export const arithmetic: JsonGateDict = {
       ["right", "out"],
     ],
   }),
-
   CLine: JSON.stringify({
     name: "nodeLine",
     x: 46,
@@ -1025,4 +1105,375 @@ export const arithmetic: JsonGateDict = {
       "addStart0out0",
     ],
   }),
+  Adder10Label: {
+    elementName: "node",
+    elementProps: {
+      position: [59, 34],
+      label: "16-BIT ADD",
+      invisible: "true",
+    },
+  },
+  Add16A: JSON.stringify({ name: "nodeLine", x: 90, y: 1, amount: 16 }),
+  Add16B: JSON.stringify({ name: "nodeLine", x: 90, y: 37, amount: 16 }),
+  Add16: JSON.stringify({
+    name: "add",
+    position: [89, 3],
+    bit: 16,
+    nodes: [
+      ["top", "Add16A0"],
+      ["top", "Add16A1"],
+      ["top", "Add16A2"],
+      ["top", "Add16A3"],
+      ["top", "Add16A4"],
+      ["top", "Add16A5"],
+      ["top", "Add16A6"],
+      ["top", "Add16A7"],
+      ["top", "Add16A8"],
+      ["top", "Add16A9"],
+      ["top", "Add16A10"],
+      ["top", "Add16A11"],
+      ["top", "Add16A12"],
+      ["top", "Add16A13"],
+      ["top", "Add16A14"],
+      ["top", "Add16A15"],
+      ["bottom", "Add16B0"],
+      ["bottom", "Add16B1"],
+      ["bottom", "Add16B2"],
+      ["bottom", "Add16B3"],
+      ["bottom", "Add16B4"],
+      ["bottom", "Add16B5"],
+      ["bottom", "Add16B6"],
+      ["bottom", "Add16B7"],
+      ["bottom", "Add16B8"],
+      ["bottom", "Add16B9"],
+      ["bottom", "Add16B10"],
+      ["bottom", "Add16B11"],
+      ["bottom", "Add16B12"],
+      ["bottom", "Add16B13"],
+      ["bottom", "Add16B14"],
+      ["bottom", "Add16B15"],
+
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+
+  megaTest: JSON.stringify({ name: "test", id: "megaTest" }),
+};
+
+// const arithmeticLogicUnit: JsonGateDict = {
+//   alu: ({ id }: { id: string }) => {
+//     return {
+//       fuck: stdLib.nodeLine({ x: 20, y: 10, ammount: 16 }),
+
+//       fuck2: {
+//         elementName: "node",
+//         elementProps: {
+//           position: [20, 40],
+//         },
+//       },
+//     };
+//   },
+// };
+
+export const alu: JsonGateDict = {
+  declare: {
+    ...stdLib,
+    // ...arithmeticLogicUnit,
+  },
+  xBus: JSON.stringify({
+    name: "nodeLine",
+    x: 32,
+    y: 16,
+    amount: 16,
+    vertical: true,
+  }),
+  yBus: JSON.stringify({
+    name: "nodeLine",
+    x: 32,
+    y: 132,
+    amount: 16,
+    vertical: true,
+  }),
+  flags0: {
+    elementName: "node",
+    elementProps: {
+      position: [62, 10],
+      label: "zx",
+    },
+  },
+  flags1: {
+    elementName: "node",
+    elementProps: {
+      position: [106, 10],
+      label: "nx",
+    },
+  },
+  flags3: {
+    elementName: "node",
+    elementProps: {
+      position: [64, 100],
+    },
+  },
+  zeroBus: JSON.stringify({
+    name: "nodeLine",
+    x: 47,
+    y: 86,
+    amount: 16,
+  }),
+  zeroX: JSON.stringify({
+    name: "multiBitMux",
+    position: [46, 15],
+    bit: 16,
+    nodes: [
+      ["left", "xBus0"],
+      ["left", "xBus1"],
+      ["left", "xBus2"],
+      ["left", "xBus3"],
+      ["left", "xBus4"],
+      ["left", "xBus5"],
+      ["left", "xBus6"],
+      ["left", "xBus7"],
+      ["left", "xBus8"],
+      ["left", "xBus9"],
+      ["left", "xBus10"],
+      ["left", "xBus11"],
+      ["left", "xBus12"],
+      ["left", "xBus13"],
+      ["left", "xBus14"],
+      ["left", "xBus15"],
+      ["bottom", "zeroBus0"],
+      ["bottom", "zeroBus1"],
+      ["bottom", "zeroBus2"],
+      ["bottom", "zeroBus3"],
+      ["bottom", "zeroBus4"],
+      ["bottom", "zeroBus5"],
+      ["bottom", "zeroBus6"],
+      ["bottom", "zeroBus7"],
+      ["bottom", "zeroBus8"],
+      ["bottom", "zeroBus9"],
+      ["bottom", "zeroBus10"],
+      ["bottom", "zeroBus11"],
+      ["bottom", "zeroBus12"],
+      ["bottom", "zeroBus13"],
+      ["bottom", "zeroBus14"],
+      ["bottom", "zeroBus15"],
+      ["top", "flags0"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  notZeroX: JSON.stringify({
+    name: "not",
+    bit: 16,
+    position: [84, 48],
+    straight: true,
+    nodes: [
+      ["left", "zeroX0out0"],
+      ["left", "zeroX0out1"],
+      ["left", "zeroX0out2"],
+      ["left", "zeroX0out3"],
+      ["left", "zeroX0out4"],
+      ["left", "zeroX0out5"],
+      ["left", "zeroX0out6"],
+      ["left", "zeroX0out7"],
+      ["left", "zeroX0out8"],
+      ["left", "zeroX0out9"],
+      ["left", "zeroX0out10"],
+      ["left", "zeroX0out11"],
+      ["left", "zeroX0out12"],
+      ["left", "zeroX0out13"],
+      ["left", "zeroX0out14"],
+      ["left", "zeroX0out15"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  notZeroXDiag: JSON.stringify({
+    name: "nodeLine",
+    amount: 16,
+    x: 91,
+    y: 49,
+    diagonal: true,
+    connects: [
+      "notZeroX0out0",
+      "notZeroX0out1",
+      "notZeroX0out2",
+      "notZeroX0out3",
+      "notZeroX0out4",
+      "notZeroX0out5",
+      "notZeroX0out6",
+      "notZeroX0out7",
+      "notZeroX0out8",
+      "notZeroX0out9",
+      "notZeroX0out10",
+      "notZeroX0out11",
+      "notZeroX0out12",
+      "notZeroX0out13",
+      "notZeroX0out14",
+      "notZeroX0out15",
+    ],
+  }),
+  xNotMux: JSON.stringify({
+    name: "multiBitMux",
+    position: [90, 15],
+    bit: 16,
+    nodes: [
+      ["left", "zeroX0out0"],
+      ["left", "zeroX0out1"],
+      ["left", "zeroX0out2"],
+      ["left", "zeroX0out3"],
+      ["left", "zeroX0out4"],
+      ["left", "zeroX0out5"],
+      ["left", "zeroX0out6"],
+      ["left", "zeroX0out7"],
+      ["left", "zeroX0out8"],
+      ["left", "zeroX0out9"],
+      ["left", "zeroX0out10"],
+      ["left", "zeroX0out11"],
+      ["left", "zeroX0out12"],
+      ["left", "zeroX0out13"],
+      ["left", "zeroX0out14"],
+      ["left", "zeroX0out15"],
+      ["bottom", "notZeroXDiag0"],
+      ["bottom", "notZeroXDiag1"],
+      ["bottom", "notZeroXDiag2"],
+      ["bottom", "notZeroXDiag3"],
+      ["bottom", "notZeroXDiag4"],
+      ["bottom", "notZeroXDiag5"],
+      ["bottom", "notZeroXDiag6"],
+      ["bottom", "notZeroXDiag7"],
+      ["bottom", "notZeroXDiag8"],
+      ["bottom", "notZeroXDiag9"],
+      ["bottom", "notZeroXDiag10"],
+      ["bottom", "notZeroXDiag11"],
+      ["bottom", "notZeroXDiag12"],
+      ["bottom", "notZeroXDiag13"],
+      ["bottom", "notZeroXDiag14"],
+      ["bottom", "notZeroXDiag15"],
+
+      ["top", "flags1"],
+
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  zeroY: JSON.stringify({
+    name: "multiBitMux",
+    position: [46, 100],
+    bit: 16,
+    nodes: [
+      ["left", "yBus0"],
+      ["left", "yBus1"],
+      ["left", "yBus2"],
+      ["left", "yBus3"],
+      ["left", "yBus4"],
+      ["left", "yBus5"],
+      ["left", "yBus6"],
+      ["left", "yBus7"],
+      ["left", "yBus8"],
+      ["left", "yBus9"],
+      ["left", "yBus10"],
+      ["left", "yBus11"],
+      ["left", "yBus12"],
+      ["left", "yBus13"],
+      ["left", "yBus14"],
+      ["left", "yBus15"],
+      ["top", "zeroBus0"],
+      ["top", "zeroBus1"],
+      ["top", "zeroBus2"],
+      ["top", "zeroBus3"],
+      ["top", "zeroBus4"],
+      ["top", "zeroBus5"],
+      ["top", "zeroBus6"],
+      ["top", "zeroBus7"],
+      ["top", "zeroBus8"],
+      ["top", "zeroBus9"],
+      ["top", "zeroBus10"],
+      ["top", "zeroBus11"],
+      ["top", "zeroBus12"],
+      ["top", "zeroBus13"],
+      ["top", "zeroBus14"],
+      ["top", "zeroBus15"],
+      ["bottom", "flags3"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+    ],
+  }),
+  // notX: JSON.stringify({ name: "not" }),
+};
+
+const simulator: JsonGateDict = {
+  declare: {
+    ...stdLib,
+  },
 };

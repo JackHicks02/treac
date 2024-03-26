@@ -1,6 +1,7 @@
 import {
   FC,
   ReactNode,
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -86,82 +87,80 @@ interface BitNodeProps {
   invisible?: boolean;
 }
 
-export const BitNode: FC<BitNodeProps> = ({
-  CLine,
-  position,
-  positionObj,
-  label,
-  keyID,
-  forceRender,
-  invisible,
-}) => {
-  const [gridItem, setGridItem] = useState<GridItem>(position);
-  const [isDraggable, setIsDraggable] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const render = useRender();
-  const style = useStyle()[0];
+//memo isn't going to help really
+export const BitNode: FC<BitNodeProps> = memo(
+  ({ CLine, position, positionObj, label, keyID, forceRender, invisible }) => {
+    const [gridItem, setGridItem] = useState<GridItem>(position);
+    const [isDraggable, setIsDraggable] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const render = useRender();
+    const style = useStyle()[0];
 
-  forceRender &&
-    useEffect(() => {
-      forceRender();
+    forceRender &&
+      useEffect(() => {
+        forceRender();
+      }, []);
+
+    useMemo(() => {
+      positionObj[keyID] = position;
     }, []);
 
-  useMemo(() => {
-    positionObj[keyID] = position;
-  }, []);
+    const handleClick = useCallback(() => {
+      CLine.setBit(!CLine.getBit());
+      setIsDraggable((prevState) => !prevState);
+    }, []);
 
-  const handleClick = useCallback(() => {
-    CLine.setBit(!CLine.getBit());
-    setIsDraggable((prevState) => !prevState);
-  }, []);
+    const handleMouseEnter = useCallback(() => {
+      setIsHovered(true);
+    }, []);
 
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
-  }, []);
+    const handleMouseLeave = useCallback(() => {
+      setIsHovered(false);
+    }, []);
 
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
-  }, []);
+    useEffect(() => {
+      CLine.pushSetter(render);
 
-  useEffect(() => {
-    CLine.pushSetter(render);
+      return () => {
+        CLine.removeSetter(render);
+      };
+    }, []);
 
-    return () => {
-      CLine.removeSetter(render);
-    };
-  }, []);
-
-  return (
-    <>
-      {!invisible && (
-        <div
-          className={CLine.getBit() ? "rainbow" : ""}
-          style={{
-            position: "absolute",
-            zIndex: 3,
-            left: gridItem.getCoords()[0],
-            top: gridItem.getCoords()[1],
-            height: "12px",
-            width: "12px",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: CLine.getBit()
-              ? style.defaultOn
-              : style.defaultOff,
-            borderRadius: "12px",
-          }}
-          onClick={handleClick}
-        />
-      )}
-      {label && position && (
-        <Label
-          position={[gridItem.getCoords()[0] - 12, gridItem.getCoords()[1] + 6]}
-        >
-          {label}
-        </Label>
-      )}
-    </>
-  );
-};
+    return (
+      <>
+        {!invisible && (
+          <div
+            className={CLine.getBit() ? "rainbow" : ""}
+            style={{
+              position: "absolute",
+              zIndex: 3,
+              left: gridItem.getCoords()[0],
+              top: gridItem.getCoords()[1],
+              height: "12px",
+              width: "12px",
+              transform: "translate(-50%, -50%)",
+              backgroundColor: CLine.getBit()
+                ? style.defaultOn
+                : style.defaultOff,
+              borderRadius: "12px",
+            }}
+            onClick={handleClick}
+          />
+        )}
+        {label && position && (
+          <Label
+            position={[
+              gridItem.getCoords()[0] - 12,
+              gridItem.getCoords()[1] + 6,
+            ]}
+          >
+            {label}
+          </Label>
+        )}
+      </>
+    );
+  }
+);
 
 interface NGate {
   label: string;
