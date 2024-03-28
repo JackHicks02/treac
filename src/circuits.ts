@@ -282,21 +282,80 @@ const stdLib = {
       },
     ];
   },
-  test: ({ id }: { id: string }) => {
+  alu: ({ position, nodes, bit }: Dictionary<any>) => {
     return [
       {
-        elementName: "node",
+        elementName: "custom",
         elementProps: {
-          position: [20, 20],
+          position: position,
+          nodes: nodes,
+          label: "ALU",
+          func: (inputs: boolean[]): boolean[] => {
+            const flagsStart = 2 * bit;
+
+            const zx = inputs[flagsStart];
+            const nx = inputs[flagsStart + 1];
+            const zy = inputs[flagsStart + 2];
+            const ny = inputs[flagsStart + 3];
+            const f = inputs[flagsStart + 4];
+            const no = inputs[flagsStart + 5];
+
+            console.log(inputs);
+
+            let x = inputs.slice(0, bit);
+            let y = inputs.slice(16, 2 * bit);
+
+            let zr = false;
+            let ng = false;
+
+            let out = x.map((xVal, index) => xVal && y[index]);
+
+            if (zx) x = x.map(() => false);
+            if (nx) x = x.map((val) => !val);
+            if (zy) y = y.map(() => false);
+            if (ny) y = y.map((val) => !val);
+
+            if (f) {
+              let carry = false;
+              for (let i = 0; i < bit; i++) {
+                const a = x[i];
+                const b = y[i];
+
+                const sum = (a !== b) !== carry;
+                out[i] = sum;
+
+                carry = (a && b) || (a && carry) || (b && carry);
+              }
+            }
+
+            if (no) out = out.map((out) => !out);
+
+            if (out.every((bit) => bit === false)) zr = true;
+            ng = out[0];
+
+            const outs = out.concat(zr, ng);
+
+            return outs;
+          },
         },
       },
+    ];
+  },
+  clock: ({ position, clockSpeed }: Dictionary<any>) => {
+    return [
       {
-        elementName: "node",
+        elementName: "custom",
         elementProps: {
-          position: [30, 20],
+          nodes: [["right", "out"]],
+          label: "clock",
+          position: position,
+          func: () => {
+            let val = false;
+            setInterval(() => (val = !val), clockSpeed);
+            return val;
+          },
         },
       },
-      stdLib.not({ position: [40, 40], nodes: [["left", id + 1]] })[0],
     ];
   },
 };
@@ -1175,21 +1234,6 @@ export const arithmetic: JsonGateDict = {
   megaTest: JSON.stringify({ name: "test", id: "megaTest" }),
 };
 
-// const arithmeticLogicUnit: JsonGateDict = {
-//   alu: ({ id }: { id: string }) => {
-//     return {
-//       fuck: stdLib.nodeLine({ x: 20, y: 10, ammount: 16 }),
-
-//       fuck2: {
-//         elementName: "node",
-//         elementProps: {
-//           position: [20, 40],
-//         },
-//       },
-//     };
-//   },
-// };
-
 export const alu: JsonGateDict = {
   declare: {
     ...stdLib,
@@ -1467,13 +1511,114 @@ export const alu: JsonGateDict = {
       ["right", "out"],
       ["right", "out"],
       ["right", "out"],
+
+      ["bottom", "out"],
+      ["bottom", "out"],
     ],
   }),
   // notX: JSON.stringify({ name: "not" }),
 };
 
-const simulator: JsonGateDict = {
+export const simulator: JsonGateDict = {
   declare: {
     ...stdLib,
   },
+  xBus: JSON.stringify({
+    name: "nodeLine",
+    x: 12,
+    y: 12,
+    vertical: true,
+    amount: 16,
+  }),
+  yBus: JSON.stringify({
+    name: "nodeLine",
+    x: 12,
+    y: 48,
+    vertical: true,
+    amount: 16,
+  }),
+  flags: JSON.stringify({
+    name: "nodeLine",
+    x: 19,
+    y: 10,
+    amount: 6,
+  }),
+  alu: JSON.stringify({
+    name: "alu",
+    position: [18, 13],
+    bit: 16,
+    nodes: [
+      ["left", "xBus0"],
+      ["left", "xBus1"],
+      ["left", "xBus2"],
+      ["left", "xBus3"],
+      ["left", "xBus4"],
+      ["left", "xBus5"],
+      ["left", "xBus6"],
+      ["left", "xBus7"],
+      ["left", "xBus8"],
+      ["left", "xBus9"],
+      ["left", "xBus10"],
+      ["left", "xBus11"],
+      ["left", "xBus12"],
+      ["left", "xBus13"],
+      ["left", "xBus14"],
+      ["left", "xBus15"],
+      ["left", "yBus0"],
+      ["left", "yBus1"],
+      ["left", "yBus2"],
+      ["left", "yBus3"],
+      ["left", "yBus4"],
+      ["left", "yBus5"],
+      ["left", "yBus6"],
+      ["left", "yBus7"],
+      ["left", "yBus8"],
+      ["left", "yBus9"],
+      ["left", "yBus10"],
+      ["left", "yBus11"],
+      ["left", "yBus12"],
+      ["left", "yBus13"],
+      ["left", "yBus14"],
+      ["left", "yBus15"],
+
+      ["top", "flags0"],
+      ["top", "flags1"],
+      ["top", "flags2"],
+      ["top", "flags3"],
+      ["top", "flags4"],
+      ["top", "flags5"],
+
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+      ["right", "out"],
+
+      ["bottom", "out"],
+      ["bottom", "out"],
+    ],
+  }),
+};
+
+export const sequentialLogic: JsonGateDict = {
+  declare: {
+    ...stdLib,
+  },
+
+  // clockTest: JSON.stringify({
+  //   name: "clock",
+  //   position: [20, 20],
+  //   clockSpeed: 1000,
+  // }),
 };

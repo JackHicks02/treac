@@ -2,7 +2,13 @@ import { GridPage } from "../Pages/GridTest";
 import NodesAndVectors from "../Pages/NodesAndVectors";
 import Parser from "../Pages/Parser";
 import Propogation from "../Pages/Propogation";
-import { alu, arithmetic, multiBitAnd } from "../circuits";
+import {
+  alu,
+  arithmetic,
+  multiBitAnd,
+  sequentialLogic,
+  simulator,
+} from "../circuits";
 import NAND2GATES from "../components/NAND/NANDPage";
 import Json2Gates from "../components/Parser/Json2Gates";
 import Json2Grid from "../components/Parser/Json2Grid";
@@ -29,4 +35,10 @@ export const Nand2Infinity: TabsDict = {
   ),
   Arithmetic: <Json2Grid dict={arithmetic} height={200} key="Arithmetic" />,
   ALU: <Json2Grid dict={alu} height={200} width={400} key="alu" />,
+  Simulator: (
+    <Json2Grid dict={simulator} height={200} width={400} key="simulator" />
+  ),
+  "Sequential Logic": (
+    <Json2Grid dict={sequentialLogic} height={200} width={400} key="seqLogic" />
+  ),
 };

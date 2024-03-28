@@ -822,3 +822,80 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
     </>
   );
 };
+
+interface Clock {
+  label: string;
+  keyID: string;
+  CLine: BitLine;
+  positionObj: Dictionary<Coordinate>;
+  position: Coordinate;
+  clockSpeed: number;
+}
+
+export const Clock: FC<Clock> = ({
+  label,
+  keyID,
+  CLine,
+  positionObj,
+  position,
+  clockSpeed,
+}) => {
+  const style = useStyle()[0];
+  const c = CLine.getBit();
+
+  useOneLineMount(CLine);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      CLine.setBit((prev) => !prev);
+    }, clockSpeed);
+
+    return () => {
+      clearInterval(interval);
+    };
+  });
+
+  useMemo(() => {
+    positionObj[`${keyID}A`] = [position[0] - style.gateWidth / 2, position[1]];
+    positionObj[keyID] = [position[0] + gateStyle.gateWidth / 2, position[1]];
+  }, []);
+
+  if (!position) {
+    return <></>;
+  } //This is worth keeping rather than enforcing so hidden logic can be carried out etc
+
+  return (
+    <div
+      style={{
+        ...centre,
+        position: "absolute",
+        left: position[0],
+        top: position[1],
+        width: style.gateWidth,
+        height: style.gateWidth,
+        border: "1px solid",
+        borderColor: c ? style.defaultOn : style.defaultOff,
+        borderRadius: "4px",
+      }}
+    >
+      <div
+        style={{
+          ...centre,
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+        }}
+      >
+        <strong>{label}</strong>
+      </div>
+      <DryNode
+        width={style.nodeWidth}
+        colour={c ? style.defaultOn : style.defaultOff}
+        position={[
+          gateStyle.gateWidth + gateStyle.nodeWidth / 2,
+          gateStyle.gateWidth / 2,
+        ]}
+      />
+    </div>
+  );
+};
