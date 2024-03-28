@@ -7,6 +7,7 @@ import {
   BitNode,
   NGate,
   Label,
+  Clock,
 } from "./ExtensibleGatesGrid";
 import {
   Dictionary,
@@ -251,6 +252,24 @@ const mapDictToElems = (
         <Label position={entry.elementProps.position}>
           {entry.elementProps.text}
         </Label>
+      );
+      break;
+    case "clock":
+      positionObj[_key] = entry.elementProps.position;
+
+      let outLine = new BitLine();
+
+      ElementArray.unshift(
+        <Clock
+          grid={grid}
+          positionObj={positionObj}
+          key={_key}
+          keyID={_key}
+          CLine={outLine}
+          position={entry.elementProps.position}
+          clockSpeed={entry.elementProps.clockSpeed}
+          {...entry.elementProps}
+        />
       );
       break;
     default:

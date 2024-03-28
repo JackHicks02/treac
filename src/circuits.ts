@@ -1616,9 +1616,11 @@ export const sequentialLogic: JsonGateDict = {
     ...stdLib,
   },
 
-  // clockTest: JSON.stringify({
-  //   name: "clock",
-  //   position: [20, 20],
-  //   clockSpeed: 1000,
-  // }),
+  clockTest: {
+    elementName: "clock",
+    elementProps: {
+      position: [10, 10],
+      clockSpeed: 1000,
+    },
+  },
 };

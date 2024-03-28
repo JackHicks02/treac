@@ -823,41 +823,41 @@ export const SquareVectorFromObj: FC<SquareVectorProps> = ({
   );
 };
 
-interface Clock {
-  label: string;
+interface ClockProps {
   keyID: string;
   CLine: BitLine;
-  positionObj: Dictionary<Coordinate>;
-  position: Coordinate;
+  positionObj: Dictionary<GridItem>;
+  position: GridItem;
+  grid: GridItem[][];
   clockSpeed: number;
 }
 
-export const Clock: FC<Clock> = ({
-  label,
-  keyID,
+export const Clock: FC<ClockProps> = ({
+  position,
   CLine,
   positionObj,
-  position,
+  keyID,
+  grid,
   clockSpeed,
-}) => {
+}): JSX.Element => {
   const style = useStyle()[0];
+
   const c = CLine.getBit();
 
   useOneLineMount(CLine);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      CLine.setBit((prev) => !prev);
+      CLine.setBit(!CLine.getBit());
     }, clockSpeed);
 
     return () => {
       clearInterval(interval);
     };
-  });
+  }, []);
 
   useMemo(() => {
-    positionObj[`${keyID}A`] = [position[0] - style.gateWidth / 2, position[1]];
-    positionObj[keyID] = [position[0] + gateStyle.gateWidth / 2, position[1]];
+    positionObj[keyID] = grid[position.x + 4][position.y + 2];
   }, []);
 
   if (!position) {
@@ -866,16 +866,17 @@ export const Clock: FC<Clock> = ({
 
   return (
     <div
+      className={c ? "rainbow-border" : ""}
       style={{
-        ...centre,
         position: "absolute",
-        left: position[0],
-        top: position[1],
-        width: style.gateWidth,
-        height: style.gateWidth,
+        left: position.getCoords()[0],
+        top: position.getCoords()[1],
+        width: GridItem.gap * 4,
+        height: GridItem.gap * 4,
         border: "1px solid",
         borderColor: c ? style.defaultOn : style.defaultOff,
         borderRadius: "4px",
+        transform: "translate(-1px,-1px)", // border offset :^/,
       }}
     >
       <div
@@ -886,15 +887,13 @@ export const Clock: FC<Clock> = ({
           top: "50%",
         }}
       >
-        <strong>{label}</strong>
+        <strong>⏰</strong>
       </div>
       <DryNode
+        className={c ? "rainbow" : ""}
         width={style.nodeWidth}
         colour={c ? style.defaultOn : style.defaultOff}
-        position={[
-          gateStyle.gateWidth + gateStyle.nodeWidth / 2,
-          gateStyle.gateWidth / 2,
-        ]}
+        position={[4 * GridItem.gap, 2 * GridItem.gap]}
       />
     </div>
   );
